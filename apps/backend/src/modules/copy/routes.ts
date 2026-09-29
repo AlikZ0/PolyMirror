@@ -8,6 +8,7 @@ import {
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../../context';
 import { toCopyOrder } from '../../database/mappers';
+import { notFound } from '../../lib/errors';
 import { publicOrder } from './types';
 
 export async function copyRoutes(app: FastifyInstance, ctx: AppContext) {
@@ -33,10 +34,14 @@ export async function copyRoutes(app: FastifyInstance, ctx: AppContext) {
       where: { userId_sourceTradeId: { userId: req.userId, sourceTradeId: body.sourceTradeId } },
       select: { id: true },
     });
-    return ctx.copyEngine.preview(
-      req.userId,
-      existing ? { copyOrderId: existing.id } : { sourceTradeId: body.sourceTradeId },
-    );
+    if (existing) return ctx.copyEngine.preview(req.userId, { copyOrderId: existing.id });
+    // New proposals only for trades of traders the user follows.
+    const follows = await ctx.db.watchlist.findFirst({
+      where: { userId: req.userId, trader: { trades: { some: { id: body.sourceTradeId } } } },
+      select: { id: true },
+    });
+    if (!follows) throw notFound('Trade not found among the traders you follow');
+    return ctx.copyEngine.preview(req.userId, { sourceTradeId: body.sourceTradeId });
   });
 
   app.post(
