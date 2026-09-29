@@ -274,7 +274,13 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       try {
         return await once<T>(method, path, opts, token);
       } catch (e) {
-        if (useAuth && isApiError(e) && e.kind === 'auth' && e.status === 401 && config.onUnauthorized) {
+        if (
+          useAuth &&
+          isApiError(e) &&
+          e.kind === 'auth' &&
+          e.status === 401 &&
+          config.onUnauthorized
+        ) {
           // Re-register once, then retry the original request a single time.
           const fresh = await config.onUnauthorized(token);
           if (fresh) return once<T>(method, path, opts, fresh);

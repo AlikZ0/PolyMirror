@@ -22,7 +22,9 @@ export async function getItem<K extends keyof StorageSchema>(key: K): Promise<St
   }
   try {
     const raw = globalThis.localStorage?.getItem(LOCAL_PREFIX + key);
-    return raw === null || raw === undefined ? DEFAULTS[key] : (JSON.parse(raw) as StorageSchema[K]);
+    return raw === null || raw === undefined
+      ? DEFAULTS[key]
+      : (JSON.parse(raw) as StorageSchema[K]);
   } catch {
     return DEFAULTS[key];
   }

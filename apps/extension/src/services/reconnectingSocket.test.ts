@@ -251,7 +251,11 @@ describe('ReconnectingSocket', () => {
     s.connect();
     await vi.advanceTimersByTimeAsync(0);
     latest().serverOpen();
-    latest().serverSend('connection.status', { status: 'error', message: 'bad token', serverTime: 1 });
+    latest().serverSend('connection.status', {
+      status: 'error',
+      message: 'bad token',
+      serverTime: 1,
+    });
     expect(onAuthError).toHaveBeenCalledWith('bad token');
     expect(s.getState()).toBe('open');
     s.close();

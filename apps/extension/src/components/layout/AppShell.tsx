@@ -35,7 +35,9 @@ export function AppShell() {
                   className={({ isActive }) =>
                     cn(
                       '-mb-px block border-b-2 px-3 py-2 text-sm whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-                      isActive ? 'border-accent font-medium text-fg' : 'border-transparent text-muted hover:text-fg',
+                      isActive
+                        ? 'border-accent font-medium text-fg'
+                        : 'border-transparent text-muted hover:text-fg',
                     )
                   }
                 >

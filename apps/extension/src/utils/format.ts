@@ -21,6 +21,13 @@ export function formatAmount(value: number | null | undefined): string {
 
 /** Tailwind text color for a signed value. */
 export function signClass(value: number | null | undefined): string {
-  if (value === null || value === undefined || !Number.isFinite(value) || value === 0) return 'text-fg';
+  if (value === null || value === undefined || !Number.isFinite(value) || value === 0)
+    return 'text-fg';
   return value > 0 ? 'text-positive' : 'text-negative';
+}
+
+/** Compact notation only for large values, so small P/L (e.g. $2.40) is never rounded away. */
+export function formatUsdShort(value: number | null | undefined, signed = false): string {
+  const large = value !== null && value !== undefined && Math.abs(value) >= 10_000;
+  return formatUsd(value, { signed, compact: large });
 }

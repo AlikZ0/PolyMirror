@@ -121,7 +121,9 @@ export interface ScannerFilters {
   category?: string;
   activity?: 'active' | 'inactive' | 'any';
   minPnl?: number;
+  /** Ratio, e.g. 0.1 = 10%. */
   minRoi?: number;
+  /** Ratio 0..1. */
   minWinRate?: number;
   minAveragePosition?: number;
   maxDrawdown?: number;

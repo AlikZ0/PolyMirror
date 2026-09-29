@@ -10,7 +10,15 @@ import { useTraderPerformance } from '../../hooks/queries';
  * Neutral side-by-side comparison. Deliberately no verdict and no winner highlighting:
  * both columns use the same styling and values are shown as-is.
  */
-function Column({ title, side, footnote }: { title: string; side: ComparisonSide; footnote?: string }) {
+function Column({
+  title,
+  side,
+  footnote,
+}: {
+  title: string;
+  side: ComparisonSide;
+  footnote?: string;
+}) {
   const rows: Array<[string, string]> = [
     ['ROI', formatPct(side.roi, { signed: true })],
     ['P/L', formatUsd(side.pnl, { signed: true })],
@@ -46,8 +54,11 @@ export function ComparisonPage() {
         title="Performance comparison"
         description={
           <>
-            Trader <Link className="text-accent hover:underline" to={`/traders/${address}`}>{shortAddress(address)}</Link> vs.
-            your copies of this trader.
+            Trader{' '}
+            <Link className="text-accent hover:underline" to={`/traders/${address}`}>
+              {shortAddress(address)}
+            </Link>{' '}
+            vs. your copies of this trader.
           </>
         }
       />

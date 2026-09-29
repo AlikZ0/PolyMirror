@@ -28,7 +28,10 @@ export function WatchlistPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Watchlist" description="Traders you follow. Paused traders do not create copy proposals." />
+      <PageHeader
+        title="Watchlist"
+        description="Traders you follow. Paused traders do not create copy proposals."
+      />
       {error ? (
         <p role="alert" className="text-xs text-negative">
           {errorMessage(error)}
@@ -79,23 +82,43 @@ export function WatchlistPage() {
                           {w.status === 'ACTIVE' ? 'Active' : 'Paused'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-xs text-muted">{formatRelativeTime(w.lastTradeAt)}</TableCell>
-                      <TableCell className="text-right tabular-nums">{formatUsd(w.totalVolume, { compact: true })}</TableCell>
-                      <TableCell className="text-right"><Pnl value={w.pnl} compact /></TableCell>
-                      <TableCell className="text-right"><Pct value={w.roi} /></TableCell>
+                      <TableCell className="text-xs text-muted">
+                        {formatRelativeTime(w.lastTradeAt)}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {formatUsd(w.totalVolume, { compact: true })}
+                      </TableCell>
                       <TableCell className="text-right">
-                        {w.newTrades > 0 ? <Badge variant="info">{formatNumber(w.newTrades)}</Badge> : '0'}
+                        <Pnl value={w.pnl} compact />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Pct value={w.roi} />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {w.newTrades > 0 ? (
+                          <Badge variant="info">{formatNumber(w.newTrades)}</Badge>
+                        ) : (
+                          '0'
+                        )}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Link to={`/traders/${w.traderAddress}`} className={buttonVariants({ size: 'sm', variant: 'secondary' })}>
+                          <Link
+                            to={`/traders/${w.traderAddress}`}
+                            className={buttonVariants({ size: 'sm', variant: 'secondary' })}
+                          >
                             Open
                           </Link>
                           <Button
                             size="sm"
                             variant="secondary"
                             loading={setStatus.isPending && setStatus.variables?.id === w.id}
-                            onClick={() => setStatus.mutate({ id: w.id, status: w.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE' })}
+                            onClick={() =>
+                              setStatus.mutate({
+                                id: w.id,
+                                status: w.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE',
+                              })
+                            }
                           >
                             {w.status === 'ACTIVE' ? 'Pause' : 'Resume'}
                           </Button>

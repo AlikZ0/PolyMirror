@@ -10,7 +10,10 @@ export function DashboardPage() {
   const query = useDashboard();
   return (
     <div className="flex flex-col gap-5">
-      <PageHeader title="Dashboard" description="Your followed whales and copy activity at a glance." />
+      <PageHeader
+        title="Dashboard"
+        description="Your followed whales and copy activity at a glance."
+      />
       <QueryBoundary
         query={query}
         skeleton={
@@ -23,13 +26,20 @@ export function DashboardPage() {
       >
         {(d) => (
           <div className="flex flex-col gap-5">
-            <section aria-label="Summary" className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+            <section
+              aria-label="Summary"
+              className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7"
+            >
               <StatCard label="Tracked traders" value={formatNumber(d.trackedTraders)} />
               <StatCard label="New trades" value={formatNumber(d.newTrades)} />
               <StatCard label="Copied" value={formatNumber(d.copiedTrades)} />
               <StatCard label="Skipped" value={formatNumber(d.skippedTrades)} />
               <StatCard label="Today's copied volume" value={formatUsd(d.todayCopiedVolume)} />
-              <StatCard label="P/L" value={formatUsd(d.pnl, { signed: true })} tone={toneOf(d.pnl)} />
+              <StatCard
+                label="P/L"
+                value={formatUsd(d.pnl, { signed: true })}
+                tone={toneOf(d.pnl)}
+              />
               <StatCard
                 label="Pending confirmations"
                 value={formatNumber(d.pendingConfirmations)}

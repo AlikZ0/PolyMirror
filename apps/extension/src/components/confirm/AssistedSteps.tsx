@@ -16,7 +16,13 @@ interface AssistedStepsProps {
  * Assisted execution: PolyMirror cannot place the order for the user. It prepares the details,
  * opens the market on Polymarket and later verifies a matching fill on the user's public wallet.
  */
-export function AssistedSteps({ order, preview, verifying, verifyRequested, onVerify }: AssistedStepsProps) {
+export function AssistedSteps({
+  order,
+  preview,
+  verifying,
+  verifyRequested,
+  onVerify,
+}: AssistedStepsProps) {
   const url = safePolymarketUrl(order.marketUrl ?? preview.marketUrl);
 
   const openMarket = async () => {
@@ -64,7 +70,11 @@ export function AssistedSteps({ order, preview, verifying, verifyRequested, onVe
           I placed the order
         </Button>
       </div>
-      {!url ? <p className="text-xs text-warning">Market link unavailable — search the market on Polymarket.</p> : null}
+      {!url ? (
+        <p className="text-xs text-warning">
+          Market link unavailable — search the market on Polymarket.
+        </p>
+      ) : null}
       {verifyRequested && !verifying ? (
         <p className="text-xs text-muted" role="status">
           Verification requested. Waiting for a matching fill on your wallet — this can take a few

@@ -16,11 +16,19 @@ export function ConnectionDot({ showLabel = true }: { showLabel?: boolean }) {
   const snapshot = useConnectionStore((s) => s.snapshot);
   const available = useConnectionStore((s) => s.bridgeAvailable);
   const state = snapshot?.state ?? 'connecting';
-  const color =
-    !available ? 'bg-muted' : state === 'authenticated' ? 'bg-positive' : state === 'closed' ? 'bg-negative' : 'bg-warning';
+  const color = !available
+    ? 'bg-muted'
+    : state === 'authenticated'
+      ? 'bg-positive'
+      : state === 'closed'
+        ? 'bg-negative'
+        : 'bg-warning';
   const label = available ? LABELS[state] : 'No background';
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs text-muted" title={`Realtime: ${label}`}>
+    <span
+      className="inline-flex items-center gap-1.5 text-xs text-muted"
+      title={`Realtime: ${label}`}
+    >
       <span className={cn('h-2 w-2 rounded-full', color)} aria-hidden="true" />
       {showLabel ? <span>{label}</span> : <span className="sr-only">Realtime: {label}</span>}
     </span>
@@ -34,11 +42,17 @@ export function ConnectionBanner() {
   const now = useNow(1_000);
   if (!available || !snapshot || snapshot.state === 'authenticated') return null;
   // Do not flash the banner during the very first connection attempt.
-  if (snapshot.state === 'connecting' && snapshot.lastAuthenticatedAt === null && snapshot.attempt === 0) {
+  if (
+    snapshot.state === 'connecting' &&
+    snapshot.lastAuthenticatedAt === null &&
+    snapshot.attempt === 0
+  ) {
     return null;
   }
   const secs =
-    snapshot.nextRetryAt !== null ? Math.max(0, Math.ceil((snapshot.nextRetryAt - now) / 1000)) : null;
+    snapshot.nextRetryAt !== null
+      ? Math.max(0, Math.ceil((snapshot.nextRetryAt - now) / 1000))
+      : null;
   return (
     <div
       role="alert"

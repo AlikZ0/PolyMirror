@@ -25,9 +25,16 @@ export function ProfileHeader({ profile: p }: { profile: TraderProfile }) {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             {p.profileImage ? (
-              <img src={p.profileImage} alt="" className="h-10 w-10 rounded-full border border-border object-cover" />
+              <img
+                src={p.profileImage}
+                alt=""
+                className="h-10 w-10 rounded-full border border-border object-cover"
+              />
             ) : (
-              <div aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-2 text-lg">
+              <div
+                aria-hidden="true"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-2 text-lg"
+              >
                 🐋
               </div>
             )}
@@ -41,7 +48,11 @@ export function ProfileHeader({ profile: p }: { profile: TraderProfile }) {
           </div>
           <div className="flex flex-wrap gap-2">
             {p.isWatched && p.watchlistId ? (
-              <Button variant="secondary" loading={busy} onClick={() => remove.mutate(p.watchlistId!)}>
+              <Button
+                variant="secondary"
+                loading={busy}
+                onClick={() => remove.mutate(p.watchlistId!)}
+              >
                 Unfollow
               </Button>
             ) : (

@@ -36,52 +36,56 @@ export function PendingList({ compact = false, limit }: { compact?: boolean; lim
       >
         {(data) => (
           <>
-          {skip.isError ? (
-            <p role="alert" className="text-xs text-negative">
-              Skip failed: {errorMessage(skip.error)}
-            </p>
-          ) : null}
-          <ul className="flex flex-col gap-2" aria-label="Pending confirmations">
-            {data.items.slice(0, limit).map((item) => (
-              <li
-                key={item.order.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-surface-2/50 px-3 py-2"
-              >
-                <div className="flex min-w-0 flex-col">
-                  <span className="truncate text-sm font-medium" title={item.order.marketTitle ?? undefined}>
-                    {item.order.marketTitle ?? 'Unknown market'}
-                  </span>
-                  <span className="text-xs text-muted">
-                    {shortAddress(item.order.traderAddress)} · {item.order.side}{' '}
-                    {item.order.outcome ?? ''} · Position {formatUsd(item.preview.whaleSize, { compact: true })}{' '}
-                    · {formatRelativeTime(item.order.createdAt)}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  {!item.preview.allowed ? <Badge variant="negative">Blocked</Badge> : null}
-                  <Button
-                    size="sm"
-                    variant="success"
-                    onClick={() => setSelected(item)}
-                    aria-label={`Review copy of ${formatAmount(item.preview.amount)}`}
-                  >
-                    {compact ? 'Review' : `COPY ${formatAmount(item.preview.amount)}`}
-                  </Button>
-                  {compact ? null : (
+            {skip.isError ? (
+              <p role="alert" className="text-xs text-negative">
+                Skip failed: {errorMessage(skip.error)}
+              </p>
+            ) : null}
+            <ul className="flex flex-col gap-2" aria-label="Pending confirmations">
+              {data.items.slice(0, limit).map((item) => (
+                <li
+                  key={item.order.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-surface-2/50 px-3 py-2"
+                >
+                  <div className="flex min-w-0 flex-col">
+                    <span
+                      className="truncate text-sm font-medium"
+                      title={item.order.marketTitle ?? undefined}
+                    >
+                      {item.order.marketTitle ?? 'Unknown market'}
+                    </span>
+                    <span className="text-xs text-muted">
+                      {shortAddress(item.order.traderAddress)} · {item.order.side}{' '}
+                      {item.order.outcome ?? ''} · Position{' '}
+                      {formatUsd(item.preview.whaleSize, { compact: true })} ·{' '}
+                      {formatRelativeTime(item.order.createdAt)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {!item.preview.allowed ? <Badge variant="negative">Blocked</Badge> : null}
                     <Button
                       size="sm"
-                      variant="secondary"
-                      loading={skip.isPending && skip.variables === item.order.id}
-                      disabled={skip.isPending}
-                      onClick={() => skip.mutate(item.order.id)}
+                      variant="success"
+                      onClick={() => setSelected(item)}
+                      aria-label={`Review copy of ${formatAmount(item.preview.amount)}`}
                     >
-                      SKIP
+                      {compact ? 'Review' : `COPY ${formatAmount(item.preview.amount)}`}
                     </Button>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
+                    {compact ? null : (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        loading={skip.isPending && skip.variables === item.order.id}
+                        disabled={skip.isPending}
+                        onClick={() => skip.mutate(item.order.id)}
+                      >
+                        SKIP
+                      </Button>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
           </>
         )}
       </QueryBoundary>

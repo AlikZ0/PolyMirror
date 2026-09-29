@@ -1,5 +1,15 @@
 import { useId, type ReactNode } from 'react';
-import { Callout, Card, CardContent, CardHeader, CardTitle, Checkbox, Field, Input, cn } from '@polymirror/ui';
+import {
+  Callout,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Checkbox,
+  Field,
+  Input,
+  cn,
+} from '@polymirror/ui';
 import { SAFETY_LIMITS, type SystemInfo } from '@polymirror/shared';
 import { TagInput } from '../../components/common/TagInput';
 import { PRESET_CATEGORIES, type FormState, type NumericKey } from './formModel';
@@ -46,7 +56,15 @@ function RadioCard({
         checked ? 'border-accent bg-accent/10' : 'border-border hover:bg-surface-2/60',
       )}
     >
-      <input id={id} type="radio" name={name} value={value} checked={checked} onChange={onChange} className="mt-1 accent-accent" />
+      <input
+        id={id}
+        type="radio"
+        name={name}
+        value={value}
+        checked={checked}
+        onChange={onChange}
+        className="mt-1 accent-accent"
+      />
       <span className="flex flex-col">
         <span className="text-sm font-medium">{title}</span>
         <span className="text-xs text-muted">{description}</span>
@@ -65,7 +83,14 @@ function NumberField({
   step = 'any',
   min = 0,
   max,
-}: SectionProps & { k: NumericKey; label: string; hint?: string; step?: string; min?: number; max?: number }) {
+}: SectionProps & {
+  k: NumericKey;
+  label: string;
+  hint?: string;
+  step?: string;
+  min?: number;
+  max?: number;
+}) {
   const id = `cs-${k}`;
   return (
     <Field label={label} htmlFor={id} hint={hint} error={errors[k]}>
@@ -85,7 +110,11 @@ function NumberField({
   );
 }
 
-export function ModeSection({ form, update, system }: SectionProps & { system: SystemInfo | null }) {
+export function ModeSection({
+  form,
+  update,
+  system,
+}: SectionProps & { system: SystemInfo | null }) {
   return (
     <Section title="Mode">
       <div role="radiogroup" aria-label="Copy mode" className="flex flex-col gap-2">
@@ -108,13 +137,17 @@ export function ModeSection({ form, update, system }: SectionProps & { system: S
       </div>
       {form.mode === 'AUTOMATIC' ? (
         <Callout variant="warning" title="Automatic mode" role="alert">
-          Automatic execution only happens where the backend supports programmatic execution, i.e. the
-          demo simulation. In live / assisted mode every order still requires you to place and confirm
-          it yourself. All limits below always apply.
+          Automatic execution only happens where the backend supports programmatic execution, i.e.
+          the demo simulation. In live / assisted mode every order still requires you to place and
+          confirm it yourself. All limits below always apply.
           {system ? (
             <div className="mt-1">
-              This backend: <strong>{system.mode}</strong> data, <strong>{system.execution}</strong> execution
-              {system.supportsProgrammaticExecution ? ' (programmatic execution supported)' : ' (no programmatic execution)'}.
+              This backend: <strong>{system.mode}</strong> data, <strong>{system.execution}</strong>{' '}
+              execution
+              {system.supportsProgrammaticExecution
+                ? ' (programmatic execution supported)'
+                : ' (no programmatic execution)'}
+              .
             </div>
           ) : null}
         </Callout>
@@ -147,9 +180,20 @@ export function SizingSection(props: SectionProps) {
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         {form.sizingMode === 'FIXED' ? (
-          <NumberField {...props} k="fixedAmount" label="Copy amount ($)" max={SAFETY_LIMITS.MAX_COPY_AMOUNT} />
+          <NumberField
+            {...props}
+            k="fixedAmount"
+            label="Copy amount ($)"
+            max={SAFETY_LIMITS.MAX_COPY_AMOUNT}
+          />
         ) : (
-          <NumberField {...props} k="percentage" label="Percentage (%)" hint="0.01 means 0.01% of the trader's trade" max={100} />
+          <NumberField
+            {...props}
+            k="percentage"
+            label="Percentage (%)"
+            hint="0.01 means 0.01% of the trader's trade"
+            max={100}
+          />
         )}
         <NumberField {...props} k="minCopyAmount" label="Min copy amount ($)" />
       </div>
@@ -161,11 +205,35 @@ export function LimitsSection(props: SectionProps) {
   return (
     <Section title="Limits">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <NumberField {...props} k="maxPerTrade" label="Max per trade ($)" hint={`Hard cap ${SAFETY_LIMITS.MAX_COPY_AMOUNT}`} max={SAFETY_LIMITS.MAX_COPY_AMOUNT} />
-        <NumberField {...props} k="maxDailyAmount" label="Max daily amount ($)" hint={`Hard cap ${SAFETY_LIMITS.MAX_DAILY_COPY_VOLUME}`} max={SAFETY_LIMITS.MAX_DAILY_COPY_VOLUME} />
-        <NumberField {...props} k="maxOpenPositions" label="Max open copied positions" step="1" max={SAFETY_LIMITS.MAX_OPEN_POSITIONS} />
+        <NumberField
+          {...props}
+          k="maxPerTrade"
+          label="Max per trade ($)"
+          hint={`Hard cap ${SAFETY_LIMITS.MAX_COPY_AMOUNT}`}
+          max={SAFETY_LIMITS.MAX_COPY_AMOUNT}
+        />
+        <NumberField
+          {...props}
+          k="maxDailyAmount"
+          label="Max daily amount ($)"
+          hint={`Hard cap ${SAFETY_LIMITS.MAX_DAILY_COPY_VOLUME}`}
+          max={SAFETY_LIMITS.MAX_DAILY_COPY_VOLUME}
+        />
+        <NumberField
+          {...props}
+          k="maxOpenPositions"
+          label="Max open copied positions"
+          step="1"
+          max={SAFETY_LIMITS.MAX_OPEN_POSITIONS}
+        />
         <NumberField {...props} k="minWhaleTrade" label="Min whale trade ($)" />
-        <NumberField {...props} k="maxSlippagePct" label="Max slippage (%)" hint={`Up to ${SAFETY_LIMITS.MAX_SLIPPAGE * 100}%`} max={SAFETY_LIMITS.MAX_SLIPPAGE * 100} />
+        <NumberField
+          {...props}
+          k="maxSlippagePct"
+          label="Max slippage (%)"
+          hint={`Up to ${SAFETY_LIMITS.MAX_SLIPPAGE * 100}%`}
+          max={SAFETY_LIMITS.MAX_SLIPPAGE * 100}
+        />
         <NumberField {...props} k="minBalance" label="Min balance to keep ($)" />
       </div>
     </Section>
@@ -205,7 +273,9 @@ export function FiltersSection({ form, errors, update }: SectionProps) {
           onChange={(next) =>
             update({
               allowedCategories: [
-                ...form.allowedCategories.filter((c) => PRESET_CATEGORIES.some((p) => p.toLowerCase() === c.toLowerCase())),
+                ...form.allowedCategories.filter((c) =>
+                  PRESET_CATEGORIES.some((p) => p.toLowerCase() === c.toLowerCase()),
+                ),
                 ...next,
               ],
             })
@@ -213,9 +283,15 @@ export function FiltersSection({ form, errors, update }: SectionProps) {
           placeholder="Add another category…"
           maxLength={64}
         />
-        {errors.allowedCategories ? <p className="text-xs text-negative">{errors.allowedCategories}</p> : null}
+        {errors.allowedCategories ? (
+          <p className="text-xs text-negative">{errors.allowedCategories}</p>
+        ) : null}
       </fieldset>
-      <Field label="Excluded markets (condition id or slug)" htmlFor="cs-excluded" error={errors.excludedMarkets}>
+      <Field
+        label="Excluded markets (condition id or slug)"
+        htmlFor="cs-excluded"
+        error={errors.excludedMarkets}
+      >
         <TagInput
           id="cs-excluded"
           value={form.excludedMarkets}
@@ -249,8 +325,10 @@ export function WalletSection({ form, errors, update }: SectionProps) {
       </Field>
       <Callout variant="warning" role="note">
         <span id="cs-wallet-warning">
-          <strong>Never enter a private key or seed phrase — PolyMirror never asks for them.</strong> Only
-          your public 0x address belongs here.
+          <strong>
+            Never enter a private key or seed phrase — PolyMirror never asks for them.
+          </strong>{' '}
+          Only your public 0x address belongs here.
         </span>
       </Callout>
     </Section>

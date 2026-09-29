@@ -31,7 +31,8 @@ function route(req: IncomingMessage, res: ServerResponse, body: unknown) {
   if (m === 'OPTIONS') return send(res, 204, undefined);
 
   if (m === 'GET' && p === '/api/system') return send(res, 200, data.system());
-  if (m === 'POST' && p === '/api/users/register') return send(res, 200, { userId: 'user-1', apiToken: 'mock-token' });
+  if (m === 'POST' && p === '/api/users/register')
+    return send(res, 200, { userId: 'user-1', apiToken: 'mock-token' });
 
   if (!(req.headers.authorization ?? '').startsWith('Bearer ')) {
     return send(res, 401, { error: { code: 'UNAUTHORIZED', message: 'Missing token' } });
@@ -47,7 +48,12 @@ function route(req: IncomingMessage, res: ServerResponse, body: unknown) {
       const page = Number(url.searchParams.get('page') ?? 1);
       const pageSize = Number(url.searchParams.get('pageSize') ?? 25);
       const all = data.trades();
-      return send(res, 200, { items: all.slice((page - 1) * pageSize, page * pageSize), total: all.length, page, pageSize });
+      return send(res, 200, {
+        items: all.slice((page - 1) * pageSize, page * pageSize),
+        total: all.length,
+        page,
+        pageSize,
+      });
     }
     if (match[2] === 'analytics') return send(res, 200, data.analytics(address));
     if (match[2] === 'performance') return send(res, 200, data.performance(address));
@@ -71,15 +77,21 @@ function route(req: IncomingMessage, res: ServerResponse, body: unknown) {
       ],
     });
   if (m === 'GET' && p === '/api/copy/settings') return send(res, 200, data.copySettings());
-  if (m === 'PUT' && p === '/api/copy/settings') return send(res, 200, { ...(body as object), updatedAt: Date.now() });
-  if (m === 'GET' && p === '/api/copy/pending') return send(res, 200, { items: [data.pendingItem()] });
+  if (m === 'PUT' && p === '/api/copy/settings')
+    return send(res, 200, { ...(body as object), updatedAt: Date.now() });
+  if (m === 'GET' && p === '/api/copy/pending')
+    return send(res, 200, { items: [data.pendingItem()] });
   if (m === 'POST' && p === '/api/copy/confirm') {
     const b = body as { confirm?: unknown; expectedAmount?: unknown; copyOrderId?: string };
     if (b?.confirm !== true || b.expectedAmount !== 10) {
-      return send(res, 400, { error: { code: 'BAD_REQUEST', message: 'Explicit confirmation required' } });
+      return send(res, 400, {
+        error: { code: 'BAD_REQUEST', message: 'Explicit confirmation required' },
+      });
     }
     const { order } = data.pendingItem();
-    return send(res, 200, { order: { ...order, status: 'CONFIRMED', executedAt: Date.now(), fillPrice: 0.63 } });
+    return send(res, 200, {
+      order: { ...order, status: 'CONFIRMED', executedAt: Date.now(), fillPrice: 0.63 },
+    });
   }
   if (m === 'POST' && p === '/api/copy/skip') {
     const { order } = data.pendingItem();
@@ -95,10 +107,12 @@ function route(req: IncomingMessage, res: ServerResponse, body: unknown) {
     return send(res, 200, { items, total: items.length, page: 1, pageSize: 25 });
   }
   if (m === 'GET' && p === '/api/statistics') return send(res, 200, data.statistics());
-  if (m === 'GET' && p === '/api/notifications') return send(res, 200, { items: data.dashboard().recentEvents, unread: 1 });
+  if (m === 'GET' && p === '/api/notifications')
+    return send(res, 200, { items: data.dashboard().recentEvents, unread: 1 });
   if (m === 'POST' && p === '/api/notifications/read') return send(res, 200, { ok: true });
   match = p.match(/^\/api\/watchlist(?:\/([^/]+))?$/);
-  if (match && m !== 'GET') return send(res, 200, m === 'DELETE' ? { ok: true } : { id: 'w-1', status: 'ACTIVE' });
+  if (match && m !== 'GET')
+    return send(res, 200, m === 'DELETE' ? { ok: true } : { id: 'w-1', status: 'ACTIVE' });
 
   return send(res, 404, { error: { code: 'NOT_FOUND', message: `No mock for ${m} ${p}` } });
 }
@@ -108,11 +122,15 @@ function route(req: IncomingMessage, res: ServerResponse, body: unknown) {
 function frame(text: string): Buffer {
   const payload = Buffer.from(text, 'utf8');
   const len = payload.length;
-  const header = len < 126 ? Buffer.from([0x81, len]) : Buffer.from([0x81, 126, len >> 8, len & 0xff]);
+  const header =
+    len < 126 ? Buffer.from([0x81, len]) : Buffer.from([0x81, 126, len >> 8, len & 0xff]);
   return Buffer.concat([header, payload]);
 }
 
-function parseFrames(buf: Buffer): { messages: Array<{ opcode: number; text: string }>; rest: Buffer } {
+function parseFrames(buf: Buffer): {
+  messages: Array<{ opcode: number; text: string }>;
+  rest: Buffer;
+} {
   const messages: Array<{ opcode: number; text: string }> = [];
   let offset = 0;
   while (buf.length - offset >= 6) {
@@ -138,7 +156,8 @@ function parseFrames(buf: Buffer): { messages: Array<{ opcode: number; text: str
 }
 
 let seq = 0;
-const envelope = (event: string, d: unknown) => JSON.stringify({ event, data: d, seq: ++seq, ts: Date.now() });
+const envelope = (event: string, d: unknown) =>
+  JSON.stringify({ event, data: d, seq: ++seq, ts: Date.now() });
 
 function handleUpgrade(req: IncomingMessage, socket: Duplex) {
   const key = req.headers['sec-websocket-key'];
@@ -146,7 +165,9 @@ function handleUpgrade(req: IncomingMessage, socket: Duplex) {
     socket.end('HTTP/1.1 404 Not Found\r\n\r\n');
     return;
   }
-  const accept = createHash('sha1').update(`${key}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`).digest('base64');
+  const accept = createHash('sha1')
+    .update(`${key}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`)
+    .digest('base64');
   socket.write(
     `HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: ${accept}\r\n\r\n`,
   );
@@ -167,7 +188,9 @@ function handleUpgrade(req: IncomingMessage, socket: Duplex) {
         continue;
       }
       if (parsedMsg.type === 'auth' || parsedMsg.type === 'ping') {
-        socket.write(frame(envelope('connection.status', { status: 'authenticated', serverTime: Date.now() })));
+        socket.write(
+          frame(envelope('connection.status', { status: 'authenticated', serverTime: Date.now() })),
+        );
       }
     }
   });

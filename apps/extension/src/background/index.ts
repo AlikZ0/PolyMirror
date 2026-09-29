@@ -69,7 +69,10 @@ onStorageChange(['apiToken', 'apiUrlOverride'], () => {
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name !== UI_PORT_NAME || port.sender?.id !== chrome.runtime.id) return;
   ports.add(port);
-  port.postMessage({ type: 'connection', snapshot: manager.getSnapshot() } satisfies BackgroundToUiMessage);
+  port.postMessage({
+    type: 'connection',
+    snapshot: manager.getSnapshot(),
+  } satisfies BackgroundToUiMessage);
   manager.ensureConnected();
   port.onMessage.addListener((raw: UiToBackgroundMessage) => {
     switch (raw?.type) {
@@ -80,7 +83,10 @@ chrome.runtime.onConnect.addListener((port) => {
         void refreshBadge();
         break;
       case 'get-connection':
-        port.postMessage({ type: 'connection', snapshot: manager.getSnapshot() } satisfies BackgroundToUiMessage);
+        port.postMessage({
+          type: 'connection',
+          snapshot: manager.getSnapshot(),
+        } satisfies BackgroundToUiMessage);
         break;
       default:
         break;
@@ -92,7 +98,9 @@ chrome.runtime.onConnect.addListener((port) => {
 // --- notifications -----------------------------------------------------------------------------
 
 function pendingIdOf(notificationId: string): string | null {
-  return notificationId.startsWith(PENDING_PREFIX) ? notificationId.slice(PENDING_PREFIX.length) : null;
+  return notificationId.startsWith(PENDING_PREFIX)
+    ? notificationId.slice(PENDING_PREFIX.length)
+    : null;
 }
 
 /** Clicking a notification only opens the confirmation screen — it never executes anything. */

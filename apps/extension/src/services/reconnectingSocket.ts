@@ -87,7 +87,11 @@ export class ReconnectingSocket {
   private readonly opts: Required<
     Pick<
       ReconnectingSocketOptions,
-      'initialDelayMs' | 'maxDelayMs' | 'heartbeatIntervalMs' | 'heartbeatTimeoutMs' | 'authTimeoutMs'
+      | 'initialDelayMs'
+      | 'maxDelayMs'
+      | 'heartbeatIntervalMs'
+      | 'heartbeatTimeoutMs'
+      | 'authTimeoutMs'
     >
   >;
   private readonly timers: TimerApi;
@@ -154,7 +158,10 @@ export class ReconnectingSocket {
 
   /** Current backoff delay for a given attempt (1-based): min(cap, initial * 2^(n-1)) with jitter. */
   backoffDelay(attempt: number): number {
-    const base = Math.min(this.opts.maxDelayMs, this.opts.initialDelayMs * 2 ** Math.max(0, attempt - 1));
+    const base = Math.min(
+      this.opts.maxDelayMs,
+      this.opts.initialDelayMs * 2 ** Math.max(0, attempt - 1),
+    );
     // "Equal jitter": half fixed, half random, so delays grow but never synchronize across clients.
     return Math.round(base / 2 + this.random() * (base / 2));
   }

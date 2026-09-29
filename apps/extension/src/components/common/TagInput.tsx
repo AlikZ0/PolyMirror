@@ -11,7 +11,14 @@ export interface TagInputProps {
 }
 
 /** Free-text tag list: Enter or "Add" appends, each tag has a remove button. */
-export function TagInput({ id, value, onChange, placeholder, maxLength = 128, ariaDescribedBy }: TagInputProps) {
+export function TagInput({
+  id,
+  value,
+  onChange,
+  placeholder,
+  maxLength = 128,
+  ariaDescribedBy,
+}: TagInputProps) {
   const [draft, setDraft] = useState('');
   const add = () => {
     const tag = draft.trim().slice(0, maxLength);

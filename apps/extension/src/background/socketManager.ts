@@ -51,7 +51,8 @@ export class SocketManager {
           attempt: info.attempt,
           nextRetryAt: info.nextRetryAt,
           lastError: info.lastError,
-          lastAuthenticatedAt: state === 'authenticated' ? Date.now() : this.snapshot.lastAuthenticatedAt,
+          lastAuthenticatedAt:
+            state === 'authenticated' ? Date.now() : this.snapshot.lastAuthenticatedAt,
         };
         this.broadcast({ type: 'connection', snapshot: this.snapshot });
         this.trackConnectionLoss(state);

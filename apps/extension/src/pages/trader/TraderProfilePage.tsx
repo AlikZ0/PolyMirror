@@ -28,7 +28,9 @@ export function TraderProfilePage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <QueryBoundary query={query}>{(profile) => <ProfileHeader profile={profile} />}</QueryBoundary>
+      <QueryBoundary query={query}>
+        {(profile) => <ProfileHeader profile={profile} />}
+      </QueryBoundary>
       <Card>
         <CardContent className="pt-3">
           <div className="flex flex-wrap items-end justify-between gap-2">

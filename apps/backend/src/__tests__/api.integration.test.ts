@@ -33,6 +33,8 @@ describe.skipIf(!reachable)('API integration (PostgreSQL)', () => {
   const app = createServer(config);
   let ctx: AppContext;
   let auth: Record<string, string>;
+  let userId: string;
+  const realStart = Date.now();
 
   beforeAll(async () => {
     ctx = createContext(config, db, app.log, adapter);
@@ -40,9 +42,13 @@ describe.skipIf(!reachable)('API integration (PostgreSQL)', () => {
     const res = await app.inject({ method: 'POST', url: '/api/users/register' });
     expect(res.statusCode).toBe(201);
     auth = { authorization: `Bearer ${res.json().apiToken}` };
+    userId = res.json().userId;
   });
 
   afterAll(async () => {
+    // The test advances the demo clock: remove its user and the future-dated fills it ingested.
+    if (userId) await db.user.delete({ where: { id: userId } }).catch(() => undefined);
+    await db.trade.deleteMany({ where: { timestamp: { gt: new Date(realStart + 60_000) } } });
     await app.close();
     await db.$disconnect();
   });

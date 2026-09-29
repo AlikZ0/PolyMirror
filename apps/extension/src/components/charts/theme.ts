@@ -11,7 +11,16 @@ export const CHART = {
   accent: '#3987e5',
   positive: '#22c55e',
   negative: '#ef4444',
-  categorical: ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9', '#e66767'],
+  categorical: [
+    '#3987e5',
+    '#d95926',
+    '#199e70',
+    '#c98500',
+    '#d55181',
+    '#008300',
+    '#9085e9',
+    '#e66767',
+  ],
 } as const;
 
 export const tooltipStyle = {

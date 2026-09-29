@@ -18,7 +18,8 @@ import { ChartCard } from './ChartCard';
 
 type ValueKind = 'usd' | 'count';
 
-const fmt = (kind: ValueKind) => (v: number) => (kind === 'usd' ? formatUsd(v, { signed: false }) : formatNumber(v));
+const fmt = (kind: ValueKind) => (v: number) =>
+  kind === 'usd' ? formatUsd(v, { signed: false }) : formatNumber(v);
 
 export function AreaSeriesChart({
   title,
@@ -46,14 +47,24 @@ export function AreaSeriesChart({
           </defs>
           <CartesianGrid stroke={CHART.grid} strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="t" tickFormatter={dayLabel} {...axisProps} minTickGap={24} />
-          <YAxis tickFormatter={kind === 'usd' ? compactUsd : undefined} width={56} {...axisProps} />
+          <YAxis
+            tickFormatter={kind === 'usd' ? compactUsd : undefined}
+            width={56}
+            {...axisProps}
+          />
           <ReferenceLine y={0} stroke={CHART.axis} strokeOpacity={0.5} />
           <Tooltip
             {...tooltipStyle}
             labelFormatter={(t) => dayLabel(Number(t))}
             formatter={(v) => [fmt(kind)(Number(v)), seriesName]}
           />
-          <Area type="monotone" dataKey="value" stroke={color} strokeWidth={2} fill={`url(#${gradientId})`} />
+          <Area
+            type="monotone"
+            dataKey="value"
+            stroke={color}
+            strokeWidth={2}
+            fill={`url(#${gradientId})`}
+          />
         </AreaChart>
       </ResponsiveContainer>
     </ChartCard>
@@ -80,7 +91,12 @@ export function BarSeriesChart({
         <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke={CHART.grid} strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="t" tickFormatter={dayLabel} {...axisProps} minTickGap={24} />
-          <YAxis tickFormatter={kind === 'usd' ? compactUsd : undefined} width={56} allowDecimals={kind === 'usd'} {...axisProps} />
+          <YAxis
+            tickFormatter={kind === 'usd' ? compactUsd : undefined}
+            width={56}
+            allowDecimals={kind === 'usd'}
+            {...axisProps}
+          />
           {signed ? <ReferenceLine y={0} stroke={CHART.axis} strokeOpacity={0.5} /> : null}
           <Tooltip
             {...tooltipStyle}
@@ -92,7 +108,9 @@ export function BarSeriesChart({
           />
           <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={28} fill={CHART.accent}>
             {signed
-              ? data.map((p) => <Cell key={p.t} fill={p.value >= 0 ? CHART.positive : CHART.negative} />)
+              ? data.map((p) => (
+                  <Cell key={p.t} fill={p.value >= 0 ? CHART.positive : CHART.negative} />
+                ))
               : null}
           </Bar>
         </BarChart>

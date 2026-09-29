@@ -17,7 +17,8 @@ interface Draft {
   maxDrawdown: string;
 }
 
-const str = (v: number | undefined, scale = 1) => (v === undefined ? '' : String(+(v * scale).toFixed(6)));
+const str = (v: number | undefined, scale = 1) =>
+  v === undefined ? '' : String(+(v * scale).toFixed(6));
 const num = (v: string, scale = 1): number | undefined => {
   if (v.trim() === '') return undefined;
   const n = Number(v);

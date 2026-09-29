@@ -17,7 +17,10 @@ import { CHART, axisProps, tooltipStyle } from './theme';
 import { ChartCard } from './ChartCard';
 
 /** Folds buckets beyond the 8 categorical slots into "Other" (hues are never generated/cycled). */
-function foldBuckets(buckets: DistributionBucket[], max = CHART.categorical.length): DistributionBucket[] {
+function foldBuckets(
+  buckets: DistributionBucket[],
+  max = CHART.categorical.length,
+): DistributionBucket[] {
   const nonEmpty = buckets.filter((b) => b.count > 0);
   if (nonEmpty.length <= max) return nonEmpty;
   const sorted = [...nonEmpty].sort((a, b) => b.count - a.count);
@@ -44,7 +47,10 @@ export function DistributionPie({ title, data }: { title: string; data: Distribu
             {...tooltipStyle}
             formatter={(v, _n, entry) => {
               const b = (entry as { payload?: DistributionBucket }).payload;
-              return [`${formatNumber(Number(v))} trades · ${formatUsd(b?.volume ?? null, { compact: true })}`, b?.label ?? ''];
+              return [
+                `${formatNumber(Number(v))} trades · ${formatUsd(b?.volume ?? null, { compact: true })}`,
+                b?.label ?? '',
+              ];
             }}
           />
           <Legend wrapperStyle={{ fontSize: 11, color: CHART.axis }} />
@@ -89,7 +95,10 @@ export function DistributionBars({
             {...tooltipStyle}
             formatter={(v, _n, entry) => {
               const b = (entry as { payload?: DistributionBucket }).payload;
-              return [`${formatNumber(Number(v))} · ${formatUsd(b?.volume ?? null, { compact: true })} volume`, 'Trades'];
+              return [
+                `${formatNumber(Number(v))} · ${formatUsd(b?.volume ?? null, { compact: true })} volume`,
+                'Trades',
+              ];
             }}
           />
           <Bar dataKey="count" radius={[4, 4, 0, 0]} maxBarSize={48} fill={CHART.accent}>
@@ -103,7 +112,10 @@ export function DistributionBars({
 
 /** 24 bars, UTC hour of day → number of fills. */
 export function ActiveHoursChart({ hours }: { hours: number[] }) {
-  const data = Array.from({ length: 24 }, (_, h) => ({ hour: `${String(h).padStart(2, '0')}`, count: hours[h] ?? 0 }));
+  const data = Array.from({ length: 24 }, (_, h) => ({
+    hour: `${String(h).padStart(2, '0')}`,
+    count: hours[h] ?? 0,
+  }));
   const empty = data.every((d) => d.count === 0);
   return (
     <ChartCard title="Active hours (UTC)" empty={empty} height={180}>
@@ -112,7 +124,11 @@ export function ActiveHoursChart({ hours }: { hours: number[] }) {
           <CartesianGrid stroke={CHART.grid} strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="hour" {...axisProps} interval={2} />
           <YAxis allowDecimals={false} width={32} {...axisProps} />
-          <Tooltip {...tooltipStyle} labelFormatter={(h) => `${h}:00 UTC`} formatter={(v) => [formatNumber(Number(v)), 'Fills']} />
+          <Tooltip
+            {...tooltipStyle}
+            labelFormatter={(h) => `${h}:00 UTC`}
+            formatter={(v) => [formatNumber(Number(v)), 'Fills']}
+          />
           <Bar dataKey="count" fill={CHART.accent} radius={[3, 3, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>

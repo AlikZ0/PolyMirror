@@ -6,7 +6,8 @@ export const queryKeys = {
   dashboard: ['dashboard'] as const,
   traders: (f: ScannerFilters) => ['traders', f] as const,
   trader: (address: string) => ['trader', address] as const,
-  traderTrades: (address: string, q: HistoricalTradesQuery) => ['trader', address, 'trades', q] as const,
+  traderTrades: (address: string, q: HistoricalTradesQuery) =>
+    ['trader', address, 'trades', q] as const,
   traderAnalytics: (address: string, period: TimePeriod) =>
     ['trader', address, 'analytics', period] as const,
   traderPerformance: (address: string) => ['trader', address, 'performance'] as const,

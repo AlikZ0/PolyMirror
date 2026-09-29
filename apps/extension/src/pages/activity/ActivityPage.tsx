@@ -82,22 +82,34 @@ export function ActivityPage() {
                   <TableBody>
                     {data.items.map((o) => (
                       <TableRow key={o.id}>
-                        <TableCell className="text-xs text-muted">{formatDateTime(o.createdAt)}</TableCell>
+                        <TableCell className="text-xs text-muted">
+                          {formatDateTime(o.createdAt)}
+                        </TableCell>
                         <TableCell>
                           <TraderLink address={o.traderAddress} />
                         </TableCell>
                         <TableCell className="max-w-64 whitespace-normal">
                           <span className="line-clamp-2">{o.marketTitle ?? 'N/A'}</span>
                           {o.status === 'FAILED' && o.failureReason ? (
-                            <span className="block text-xs text-negative">Reason: {o.failureReason}</span>
+                            <span className="block text-xs text-negative">
+                              Reason: {o.failureReason}
+                            </span>
                           ) : null}
                         </TableCell>
-                        <TableCell className="text-right tabular-nums">{formatUsd(o.whaleSize, { compact: true })}</TableCell>
-                        <TableCell className="text-right font-semibold tabular-nums">{formatUsd(o.amount)}</TableCell>
-                        <TableCell>
-                          <Badge variant={o.side === 'BUY' ? 'positive' : 'negative'}>{o.side}</Badge>
+                        <TableCell className="text-right tabular-nums">
+                          {formatUsd(o.whaleSize, { compact: true })}
                         </TableCell>
-                        <TableCell className="text-right tabular-nums">{formatPrice(o.fillPrice ?? o.whalePrice)}</TableCell>
+                        <TableCell className="text-right font-semibold tabular-nums">
+                          {formatUsd(o.amount)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={o.side === 'BUY' ? 'positive' : 'negative'}>
+                            {o.side}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {formatPrice(o.fillPrice ?? o.whalePrice)}
+                        </TableCell>
                         <TableCell>
                           <CopyStatusBadge status={o.status} />
                         </TableCell>
@@ -108,7 +120,13 @@ export function ActivityPage() {
                     ))}
                   </TableBody>
                 </Table>
-                <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={setPage} disabled={query.isFetching} />
+                <Pagination
+                  page={data.page}
+                  pageSize={data.pageSize}
+                  total={data.total}
+                  onPageChange={setPage}
+                  disabled={query.isFetching}
+                />
               </div>
             )}
           </QueryBoundary>
