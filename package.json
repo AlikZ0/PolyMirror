@@ -1,0 +1,45 @@
+{
+  "name": "polymirror",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PolyMirror — analyze large Polymarket traders and manually mirror their decisions with your own controlled amount.",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20.10"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @polymirror/backend --filter @polymirror/extension dev",
+    "build": "pnpm --filter @polymirror/shared --filter @polymirror/ui typecheck && pnpm --filter @polymirror/backend build && pnpm --filter @polymirror/extension build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter @polymirror/extension test:e2e",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:generate": "pnpm --filter @polymirror/backend db:generate",
+    "db:migrate": "pnpm --filter @polymirror/backend db:migrate",
+    "db:deploy": "pnpm --filter @polymirror/backend db:deploy",
+    "db:seed": "pnpm --filter @polymirror/backend db:seed"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^22.19.0",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.9",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.71.0",
+    "vitest": "^3.2.7"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "esbuild",
+      "prisma"
+    ]
+  }
+}
