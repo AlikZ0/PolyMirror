@@ -1,0 +1,45 @@
+@import 'tailwindcss';
+@source "../../../../packages/ui/src";
+
+@theme {
+  --color-bg: #0b0e14;
+  --color-surface: #121722;
+  --color-surface-2: #1a2130;
+  --color-border: #263041;
+  --color-fg: #e6e9ef;
+  --color-muted: #8b95a7;
+  --color-accent: #3b82f6;
+  --color-positive: #22c55e;
+  --color-negative: #ef4444;
+  --color-warning: #f59e0b;
+  --color-demo: #facc15;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  margin: 0;
+}
+
+body.popup {
+  width: 380px;
+  min-height: 480px;
+  max-height: 600px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
