@@ -1,0 +1,315 @@
+// PolyMirror database schema (PostgreSQL).
+// Money values in copy trading are stored as DECIMAL; analytics caches use double precision.
+// No private keys, seed phrases or exchange credentials are ever stored here.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum WatchStatus {
+  ACTIVE
+  PAUSED
+}
+
+enum CopyMode {
+  MANUAL
+  AUTOMATIC
+}
+
+enum CopySizingMode {
+  FIXED
+  PERCENTAGE
+}
+
+enum CopyOrderStatus {
+  PENDING
+  EXECUTING
+  SUBMITTED
+  CONFIRMED
+  SKIPPED
+  FAILED
+  CANCELLED
+}
+
+enum ExecutionKind {
+  demo
+  assisted
+}
+
+enum OrderSide {
+  BUY
+  SELL
+}
+
+enum PositionStatus {
+  OPEN
+  CLOSED
+  RESOLVED
+}
+
+model User {
+  id             String   @id @default(cuid())
+  /// SHA-256 of the bearer token issued at registration. The token itself is never stored.
+  apiTokenHash   String   @unique
+  createdAt      DateTime @default(now())
+  lastSeenAt     DateTime @default(now())
+
+  watchlist      Watchlist[]
+  copySettings   CopySettings?
+  copyOrders     CopyOrder[]
+  notifications  Notification[]
+  auditLogs      AuditLog[]
+}
+
+model Trader {
+  id            String    @id @default(cuid())
+  /// Lower-cased proxy wallet address.
+  address       String    @unique
+  userName      String?
+  profileImage  String?
+  lastTradeAt   DateTime?
+  /// Watcher cursor: newest fill timestamp already processed.
+  lastPolledAt  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  snapshots     TraderSnapshot[]
+  trades        Trade[]
+  positions     TraderTrade[]
+  watchlist     Watchlist[]
+  copyOrders    CopyOrder[]
+  analytics     AnalyticsSnapshot[]
+}
+
+/// Point-in-time scanner metrics for a trader (nullable = N/A in the source data).
+model TraderSnapshot {
+  id              String   @id @default(cuid())
+  traderId        String
+  period          String
+  totalVolume     Float?
+  tradeCount      Int?
+  averagePosition Float?
+  largestTrade    Float?
+  pnl             Float?
+  roi             Float?
+  winRate         Float?
+  maxDrawdown     Float?
+  lastActive      DateTime?
+  categories      String[]
+  source          String
+  createdAt       DateTime @default(now())
+
+  trader          Trader   @relation(fields: [traderId], references: [id], onDelete: Cascade)
+
+  @@index([traderId, period, createdAt])
+}
+
+model Market {
+  id            String   @id @default(cuid())
+  conditionId   String   @unique
+  question      String
+  slug          String?
+  eventSlug     String?
+  category      String?
+  active        Boolean  @default(true)
+  closed        Boolean  @default(false)
+  outcomes      String[]
+  tokenIds      String[]
+  outcomePrices Float[]
+  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now())
+
+  trades        Trade[]
+}
+
+/// A fill of a tracked trader, as observed from the data source.
+model Trade {
+  id              String    @id @default(cuid())
+  /// Deterministic id derived from source data (see shared fillId) — de-duplicates re-polled fills.
+  sourceId        String    @unique
+  traderId        String
+  marketId        String?
+  conditionId     String
+  tokenId         String
+  side            OrderSide
+  price           Float
+  size            Float
+  notional        Float
+  outcome         String?
+  marketTitle     String?
+  marketSlug      String?
+  eventSlug       String?
+  category        String?
+  transactionHash String?
+  timestamp       DateTime
+  detectedAt      DateTime  @default(now())
+
+  trader          Trader    @relation(fields: [traderId], references: [id], onDelete: Cascade)
+  market          Market?   @relation(fields: [marketId], references: [id])
+  copyOrders      CopyOrder[]
+
+  @@index([traderId, timestamp])
+  @@index([conditionId])
+}
+
+/// A reconstructed position (round trip) of a trader — the "historical trades" table.
+model TraderTrade {
+  id           String         @id @default(cuid())
+  traderId     String
+  positionKey  String
+  conditionId  String
+  tokenId      String
+  marketTitle  String?
+  marketSlug   String?
+  outcome      String?
+  category     String?
+  status       PositionStatus
+  entryPrice   Float?
+  exitPrice    Float?
+  cost         Float
+  pnl          Float
+  realizedPnl  Float
+  roi          Float?
+  openedAt     DateTime?
+  closedAt     DateTime?
+  updatedAt    DateTime       @updatedAt
+
+  trader       Trader         @relation(fields: [traderId], references: [id], onDelete: Cascade)
+
+  @@unique([traderId, positionKey])
+  @@index([traderId, closedAt])
+}
+
+model Watchlist {
+  id          String      @id @default(cuid())
+  userId      String
+  traderId    String
+  enabled     Boolean     @default(true)
+  status      WatchStatus @default(ACTIVE)
+  newTrades   Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trader      Trader      @relation(fields: [traderId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, traderId])
+  @@index([traderId, status])
+}
+
+model CopySettings {
+  id                   String         @id @default(cuid())
+  userId               String         @unique
+  mode                 CopyMode       @default(MANUAL)
+  sizingMode           CopySizingMode @default(FIXED)
+  fixedAmount          Decimal        @default(10) @db.Decimal(20, 6)
+  percentage           Decimal        @default(0.01) @db.Decimal(12, 6)
+  minCopyAmount        Decimal        @default(1) @db.Decimal(20, 6)
+  maxPerTrade          Decimal        @default(20) @db.Decimal(20, 6)
+  maxDailyAmount       Decimal        @default(100) @db.Decimal(20, 6)
+  maxOpenPositions     Int            @default(5)
+  minWhaleTrade        Decimal        @default(10000) @db.Decimal(20, 6)
+  maxSlippage          Decimal        @default(0.03) @db.Decimal(8, 6)
+  minBalance           Decimal        @default(0) @db.Decimal(20, 6)
+  confirmationRequired Boolean        @default(true)
+  allowedCategories    String[]
+  excludedMarkets      String[]
+  /// Public wallet address (not a secret) used to verify assisted fills.
+  walletAddress        String?
+  updatedAt            DateTime       @updatedAt
+
+  user                 User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CopyOrder {
+  id                    String          @id @default(cuid())
+  userId                String
+  traderId              String
+  sourceTradeId         String
+  /// = userId::sourceTradeId — one proposal per user and whale trade.
+  idempotencyKey        String          @unique
+  /// Client idempotency key of the confirmation request (replays return the same result).
+  confirmIdempotencyKey String?         @unique
+  conditionId           String
+  tokenId               String
+  marketTitle           String?
+  marketUrl             String?
+  outcome               String?
+  category              String?
+  side                  OrderSide
+  whaleSize             Decimal         @db.Decimal(24, 6)
+  whalePrice            Decimal         @db.Decimal(12, 6)
+  amount                Decimal         @db.Decimal(20, 6)
+  estimatedShares       Decimal         @db.Decimal(24, 6)
+  status                CopyOrderStatus @default(PENDING)
+  execution             ExecutionKind
+  failureReason         String?
+  externalOrderId       String?
+  transactionHash       String?
+  fillPrice             Decimal?        @db.Decimal(12, 6)
+  filledShares          Decimal?        @db.Decimal(24, 6)
+  currentPrice          Decimal?        @db.Decimal(12, 6)
+  pnl                   Decimal?        @db.Decimal(20, 6)
+  closedAt              DateTime?
+  createdAt             DateTime        @default(now())
+  executedAt            DateTime?
+  expiresAt             DateTime
+  updatedAt             DateTime        @updatedAt
+
+  user                  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trader                Trader          @relation(fields: [traderId], references: [id], onDelete: Cascade)
+  sourceTrade           Trade           @relation(fields: [sourceTradeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sourceTradeId])
+  @@index([userId, status])
+  @@index([userId, createdAt])
+}
+
+model Notification {
+  id           String   @id @default(cuid())
+  userId       String
+  type         String
+  title        String
+  message      String
+  traderAddress String?
+  copyOrderId  String?
+  read         Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model AnalyticsSnapshot {
+  id         String   @id @default(cuid())
+  traderId   String
+  period     String
+  payload    Json
+  computedAt DateTime @default(now())
+
+  trader     Trader   @relation(fields: [traderId], references: [id], onDelete: Cascade)
+
+  @@unique([traderId, period])
+}
+
+/// Append-only log of security-relevant and financial actions.
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  payload    Json?
+  createdAt  DateTime @default(now())
+
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+}
