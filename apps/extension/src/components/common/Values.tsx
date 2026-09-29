@@ -3,7 +3,15 @@ import { cn } from '@polymirror/ui';
 import { formatPct, formatUsd, signClass } from '../../utils/format';
 
 /** Signed USD value colored green/red; N/A for null. */
-export function Pnl({ value, compact, className }: { value: number | null | undefined; compact?: boolean; className?: string }) {
+export function Pnl({
+  value,
+  compact,
+  className,
+}: {
+  value: number | null | undefined;
+  compact?: boolean;
+  className?: string;
+}) {
   return (
     <span className={cn('tabular-nums', signClass(value), className)}>
       {formatUsd(value, { signed: true, compact })}
@@ -12,7 +20,15 @@ export function Pnl({ value, compact, className }: { value: number | null | unde
 }
 
 /** Signed percentage colored green/red; N/A for null. */
-export function Pct({ value, signed = true, className }: { value: number | null | undefined; signed?: boolean; className?: string }) {
+export function Pct({
+  value,
+  signed = true,
+  className,
+}: {
+  value: number | null | undefined;
+  signed?: boolean;
+  className?: string;
+}) {
   return (
     <span className={cn('tabular-nums', signed ? signClass(value) : 'text-fg', className)}>
       {formatPct(value, { signed })}
@@ -31,5 +47,9 @@ export function MetricItem({ label, children }: { label: string; children: React
 }
 
 export function MetricGrid({ children, className }: { children: ReactNode; className?: string }) {
-  return <dl className={cn('grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4', className)}>{children}</dl>;
+  return (
+    <dl className={cn('grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4', className)}>
+      {children}
+    </dl>
+  );
 }

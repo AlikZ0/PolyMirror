@@ -47,7 +47,8 @@ function png(size) {
       const d = Math.hypot(x - c, y - c);
       let rgb = [0x0b, 0x0e, 0x14];
       if (d <= size * 0.34) rgb = y <= c ? [0x3b, 0x82, 0xf6] : [0x22, 0xc5, 0x5e];
-      if (Math.abs(y - c) <= Math.max(0.5, size * 0.03) && d <= size * 0.36) rgb = [0xff, 0xff, 0xff];
+      if (Math.abs(y - c) <= Math.max(0.5, size * 0.03) && d <= size * 0.36)
+        rgb = [0xff, 0xff, 0xff];
       raw[i] = rgb[0];
       raw[i + 1] = rgb[1];
       raw[i + 2] = rgb[2];

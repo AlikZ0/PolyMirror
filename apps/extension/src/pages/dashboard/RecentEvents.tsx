@@ -16,7 +16,13 @@ const ICONS: Record<NotificationType, string> = {
 
 export function RecentEvents({ events }: { events: NotificationItem[] }) {
   if (events.length === 0) {
-    return <EmptyState icon="📭" title="No events yet" description="Follow a trader from the Scanner to start receiving events." />;
+    return (
+      <EmptyState
+        icon="📭"
+        title="No events yet"
+        description="Follow a trader from the Scanner to start receiving events."
+      />
+    );
   }
   return (
     <ul className="flex flex-col divide-y divide-border/60" aria-label="Recent events">
@@ -29,7 +35,10 @@ export function RecentEvents({ events }: { events: NotificationItem[] }) {
             <p className="truncate text-sm font-medium">{e.title}</p>
             <p className="text-xs text-muted">{e.message}</p>
           </div>
-          <time className="shrink-0 text-xs text-muted" dateTime={new Date(e.createdAt).toISOString()}>
+          <time
+            className="shrink-0 text-xs text-muted"
+            dateTime={new Date(e.createdAt).toISOString()}
+          >
             {formatRelativeTime(e.createdAt)}
           </time>
         </li>

@@ -5,7 +5,7 @@ import { errorMessage } from '../components/common/QueryBoundary';
 import { PendingList } from '../components/confirm/PendingList';
 import { useDashboard } from '../hooks/queries';
 import { openDashboard } from '../utils/chromeApi';
-import { formatNumber, formatUsd } from '../utils/format';
+import { formatNumber, formatUsdShort } from '../utils/format';
 
 export function PopupApp() {
   const dashboard = useDashboard();
@@ -33,13 +33,13 @@ export function PopupApp() {
           />
           <StatCard
             label="Today"
-            value={d ? formatUsd(d.todayCopiedVolume, { compact: true }) : '—'}
+            value={d ? formatUsdShort(d.todayCopiedVolume) : '—'}
             loading={dashboard.isPending}
             className="px-2 py-2"
           />
           <StatCard
             label="P/L"
-            value={d ? formatUsd(d.pnl, { signed: true, compact: true }) : '—'}
+            value={d ? formatUsdShort(d.pnl, true) : '—'}
             tone={toneOf(d?.pnl)}
             loading={dashboard.isPending}
             className="px-2 py-2"
@@ -48,13 +48,19 @@ export function PopupApp() {
         {dashboard.isError ? (
           <p role="alert" className="text-xs text-negative">
             {errorMessage(dashboard.error)}{' '}
-            <button type="button" className="cursor-pointer underline" onClick={() => void dashboard.refetch()}>
+            <button
+              type="button"
+              className="cursor-pointer underline"
+              onClick={() => void dashboard.refetch()}
+            >
               Retry
             </button>
           </p>
         ) : null}
         <section aria-label="Pending confirmations" className="flex flex-col gap-2">
-          <h2 className="text-xs font-semibold tracking-wide text-muted uppercase">Pending confirmations</h2>
+          <h2 className="text-xs font-semibold tracking-wide text-muted uppercase">
+            Pending confirmations
+          </h2>
           <PendingList compact limit={5} />
         </section>
       </main>

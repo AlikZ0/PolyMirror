@@ -27,7 +27,9 @@ test.describe('PolyMirror extension', () => {
     await expect(page.getByTestId('trader-title')).toHaveText('BigWhale');
     await expect(page.getByRole('table', { name: 'Historical trades' })).toBeVisible();
     await page.getByRole('tab', { name: 'Analytics' }).click();
-    await expect(page.getByText('Average holding time only includes fully closed positions.')).toBeVisible();
+    await expect(
+      page.getByText('Average holding time only includes fully closed positions.'),
+    ).toBeVisible();
     await page.getByRole('tab', { name: 'Charts' }).click();
     await expect(page.getByRole('img', { name: 'Cumulative P/L chart' })).toBeVisible();
 

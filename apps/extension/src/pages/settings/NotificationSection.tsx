@@ -4,12 +4,21 @@ import { DEFAULT_NOTIFICATION_PREFS, type NotificationPrefs } from '../../types/
 import { getItem, setItem } from '../../utils/storage';
 
 const LABELS: Record<keyof NotificationPrefs, { label: string; description: string }> = {
-  whaleTrade: { label: 'New whale trades', description: 'A followed trader opened a position you can copy.' },
+  whaleTrade: {
+    label: 'New whale trades',
+    description: 'A followed trader opened a position you can copy.',
+  },
   copySuccess: { label: 'Copy succeeded', description: 'Your copy order was confirmed.' },
   copyFailed: { label: 'Copy failed', description: 'Your copy could not be executed.' },
   dailyLimit: { label: 'Daily limit reached', description: 'Your max daily amount has been used.' },
-  connectionLost: { label: 'Connection lost', description: 'The realtime connection has been down for 30s.' },
-  traderStatus: { label: 'Trader status changes', description: 'A followed trader became inactive.' },
+  connectionLost: {
+    label: 'Connection lost',
+    description: 'The realtime connection has been down for 30s.',
+  },
+  traderStatus: {
+    label: 'Trader status changes',
+    description: 'A followed trader became inactive.',
+  },
   other: { label: 'Other alerts', description: 'Market unavailable, insufficient balance, …' },
 };
 
@@ -17,7 +26,9 @@ export function NotificationSection() {
   const [prefs, setPrefs] = useState<NotificationPrefs>(DEFAULT_NOTIFICATION_PREFS);
 
   useEffect(() => {
-    void getItem('notificationPrefs').then((p) => setPrefs({ ...DEFAULT_NOTIFICATION_PREFS, ...p }));
+    void getItem('notificationPrefs').then((p) =>
+      setPrefs({ ...DEFAULT_NOTIFICATION_PREFS, ...p }),
+    );
   }, []);
 
   const toggle = (key: keyof NotificationPrefs, value: boolean) => {

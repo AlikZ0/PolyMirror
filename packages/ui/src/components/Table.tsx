@@ -1,9 +1,4 @@
-import type {
-  HTMLAttributes,
-  TdHTMLAttributes,
-  ThHTMLAttributes,
-  ReactNode,
-} from 'react';
+import type { HTMLAttributes, TdHTMLAttributes, ThHTMLAttributes, ReactNode } from 'react';
 import { cn } from '../lib/cn';
 
 export function Table({ className, ...props }: HTMLAttributes<HTMLTableElement>) {
@@ -15,7 +10,9 @@ export function Table({ className, ...props }: HTMLAttributes<HTMLTableElement>)
 }
 
 export function TableHeader({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
-  return <thead className={cn('border-b border-border text-xs text-muted', className)} {...props} />;
+  return (
+    <thead className={cn('border-b border-border text-xs text-muted', className)} {...props} />
+  );
 }
 
 export function TableBody({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
@@ -50,7 +47,14 @@ export interface SortableHeadProps extends Omit<ThHTMLAttributes<HTMLTableCellEl
 }
 
 /** Column header button with aria-sort; toggles direction via `onSort`. */
-export function SortableHead({ children, active, direction, onSort, className, ...props }: SortableHeadProps) {
+export function SortableHead({
+  children,
+  active,
+  direction,
+  onSort,
+  className,
+  ...props
+}: SortableHeadProps) {
   return (
     <th
       scope="col"

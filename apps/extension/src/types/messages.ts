@@ -20,6 +20,4 @@ export type BackgroundToUiMessage =
 
 /** Messages from UI pages to the background. None of them can execute a trade. */
 export type UiToBackgroundMessage =
-  | { type: 'reconnect' }
-  | { type: 'refresh-badge' }
-  | { type: 'get-connection' };
+  { type: 'reconnect' } | { type: 'refresh-badge' } | { type: 'get-connection' };

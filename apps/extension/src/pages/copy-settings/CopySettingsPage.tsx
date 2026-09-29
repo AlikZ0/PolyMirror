@@ -8,9 +8,7 @@ export function CopySettingsPage() {
   const system = useSystem();
   return (
     <QueryBoundary query={query} skeleton={<SkeletonRows rows={8} />}>
-      {(settings) => (
-        <CopySettingsForm settings={settings} system={system.data ?? null} />
-      )}
+      {(settings) => <CopySettingsForm settings={settings} system={system.data ?? null} />}
     </QueryBoundary>
   );
 }

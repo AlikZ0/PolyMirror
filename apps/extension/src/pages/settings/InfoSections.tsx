@@ -21,7 +21,9 @@ export function ModeInfoSection() {
               <Badge variant={data.mode === 'demo' ? 'warning' : 'info'}>{data.mode}</Badge>
             </dd>
             <dt className="text-muted">Execution</dt>
-            <dd>{data.execution === 'demo' ? 'Demo (simulated)' : 'Assisted (you place orders)'}</dd>
+            <dd>
+              {data.execution === 'demo' ? 'Demo (simulated)' : 'Assisted (you place orders)'}
+            </dd>
             <dt className="text-muted">Programmatic execution</dt>
             <dd>{data.supportsProgrammaticExecution ? 'Supported' : 'Not supported'}</dd>
             <dt className="text-muted">Backend version</dt>
@@ -31,7 +33,9 @@ export function ModeInfoSection() {
           </dl>
         ) : null}
         {data?.mode === 'demo' ? (
-          <p className="text-xs text-demo">Demo mode: generated data, no real trades are executed.</p>
+          <p className="text-xs text-demo">
+            Demo mode: generated data, no real trades are executed.
+          </p>
         ) : null}
       </CardContent>
     </Card>
@@ -47,14 +51,24 @@ export function SecuritySection() {
       <CardContent>
         <ul className="flex list-disc flex-col gap-1.5 pl-4 text-xs text-fg/85">
           <li>
-            <strong>PolyMirror never asks for your private key or seed phrase.</strong> Anyone who does
-            is trying to steal your funds.
+            <strong>PolyMirror never asks for your private key or seed phrase.</strong> Anyone who
+            does is trying to steal your funds.
           </li>
-          <li>Copies are only executed after you press COPY. Reconnecting never confirms anything.</li>
+          <li>
+            Copies are only executed after you press COPY. Reconnecting never confirms anything.
+          </li>
           <li>Your amounts are always computed from your own settings, never the whale's size.</li>
-          <li>On polymarket.com, PolyMirror only shows an information panel — it never clicks or fills anything.</li>
-          <li>The server enforces hard safety ceilings (max per trade, daily volume, open positions).</li>
-          <li>The session token stored in this browser is a PolyMirror session id, not a wallet credential.</li>
+          <li>
+            On polymarket.com, PolyMirror only shows an information panel — it never clicks or fills
+            anything.
+          </li>
+          <li>
+            The server enforces hard safety ceilings (max per trade, daily volume, open positions).
+          </li>
+          <li>
+            The session token stored in this browser is a PolyMirror session id, not a wallet
+            credential.
+          </li>
         </ul>
       </CardContent>
     </Card>

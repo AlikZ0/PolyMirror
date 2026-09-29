@@ -1,4 +1,9 @@
-import { DEFAULT_API_URL, DEFAULT_WEBSOCKET_URL, stripTrailingSlash, websocketUrlFor } from '../config';
+import {
+  DEFAULT_API_URL,
+  DEFAULT_WEBSOCKET_URL,
+  stripTrailingSlash,
+  websocketUrlFor,
+} from '../config';
 import { getItem, removeItem, setItem } from '../utils/storage';
 
 /**

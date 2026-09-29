@@ -27,7 +27,9 @@ export function ScannerPage() {
       sortDirection: f.sortBy === key && f.sortDirection === 'desc' ? 'asc' : 'desc',
     }));
 
-  const categories = Array.from(new Set((query.data?.items ?? []).flatMap((t) => t.categories))).sort();
+  const categories = Array.from(
+    new Set((query.data?.items ?? []).flatMap((t) => t.categories)),
+  ).sort();
 
   return (
     <div className="flex flex-col gap-4">
@@ -40,7 +42,13 @@ export function ScannerPage() {
           <ScannerFilterForm
             value={filters}
             categories={categories}
-            onApply={(f) => setFilters((prev) => ({ ...f, sortBy: prev.sortBy, sortDirection: prev.sortDirection }))}
+            onApply={(f) =>
+              setFilters((prev) => ({
+                ...f,
+                sortBy: prev.sortBy,
+                sortDirection: prev.sortDirection,
+              }))
+            }
             onReset={() => setFilters(DEFAULT_FILTERS)}
             loading={query.isFetching}
           />
@@ -62,7 +70,8 @@ export function ScannerPage() {
             {(data) => (
               <div className="flex flex-col gap-2">
                 <p className="text-xs text-muted">
-                  {data.items.length} traders · source: {data.source} · updated {formatDateTime(data.generatedAt)}
+                  {data.items.length} traders · source: {data.source} · updated{' '}
+                  {formatDateTime(data.generatedAt)}
                 </p>
                 <ScannerTable
                   items={data.items}

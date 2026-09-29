@@ -38,7 +38,8 @@ export function createApi(client: ApiClient) {
   return {
     system: (signal?: AbortSignal) =>
       get<Res<'GET /api/system'>>('/api/system', undefined, signal, false),
-    dashboard: (signal?: AbortSignal) => get<Res<'GET /api/dashboard'>>('/api/dashboard', undefined, signal),
+    dashboard: (signal?: AbortSignal) =>
+      get<Res<'GET /api/dashboard'>>('/api/dashboard', undefined, signal),
 
     traders: (filters: ScannerFilters, signal?: AbortSignal) =>
       get<Res<'GET /api/traders'>>('/api/traders', filters, signal),
@@ -63,7 +64,8 @@ export function createApi(client: ApiClient) {
         signal,
       ),
 
-    watchlist: (signal?: AbortSignal) => get<Res<'GET /api/watchlist'>>('/api/watchlist', undefined, signal),
+    watchlist: (signal?: AbortSignal) =>
+      get<Res<'GET /api/watchlist'>>('/api/watchlist', undefined, signal),
     addToWatchlist: (traderAddress: string) =>
       send<Res<'POST /api/watchlist'>>('POST', '/api/watchlist', {
         traderAddress,

@@ -5,10 +5,22 @@ import { useSaveCopySettings } from '../../hooks/mutations';
 import { isApiError } from '../../services/apiClient';
 import { errorMessage } from '../../components/common/QueryBoundary';
 import { mapServerErrors, toFormState, validate, type FormState } from './formModel';
-import { FiltersSection, LimitsSection, ModeSection, SizingSection, WalletSection } from './sections';
+import {
+  FiltersSection,
+  LimitsSection,
+  ModeSection,
+  SizingSection,
+  WalletSection,
+} from './sections';
 import { CopyPreviewCard } from './CopyPreviewCard';
 
-export function CopySettingsForm({ settings, system }: { settings: CopySettings; system: SystemInfo | null }) {
+export function CopySettingsForm({
+  settings,
+  system,
+}: {
+  settings: CopySettings;
+  system: SystemInfo | null;
+}) {
   const [form, setForm] = useState<FormState>(() => toFormState(settings));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saved, setSaved] = useState(false);
@@ -31,7 +43,8 @@ export function CopySettingsForm({ settings, system }: { settings: CopySettings;
     save.mutate(result.value, {
       onSuccess: () => setSaved(true),
       onError: (err) => {
-        if (isApiError(err) && err.kind === 'validation') setErrors(mapServerErrors(err.fieldErrors));
+        if (isApiError(err) && err.kind === 'validation')
+          setErrors(mapServerErrors(err.fieldErrors));
       },
     });
   };
@@ -40,7 +53,12 @@ export function CopySettingsForm({ settings, system }: { settings: CopySettings;
   const sectionProps = { form, errors, update, setNumber };
 
   return (
-    <form onSubmit={onSubmit} noValidate aria-label="Copy settings" className="grid gap-4 lg:grid-cols-[1fr_320px]">
+    <form
+      onSubmit={onSubmit}
+      noValidate
+      aria-label="Copy settings"
+      className="grid gap-4 lg:grid-cols-[1fr_320px]"
+    >
       <div className="flex flex-col gap-4">
         <ModeSection {...sectionProps} system={system} />
         <SizingSection {...sectionProps} />
@@ -61,7 +79,8 @@ export function CopySettingsForm({ settings, system }: { settings: CopySettings;
                 {errors.form ? <div>{errors.form}</div> : null}
               </Callout>
             ) : null}
-            {save.isError && !(isApiError(save.error) && Object.keys(save.error.fieldErrors).length > 0) ? (
+            {save.isError &&
+            !(isApiError(save.error) && Object.keys(save.error.fieldErrors).length > 0) ? (
               <Callout variant="danger" role="alert">
                 {errorMessage(save.error)}
               </Callout>

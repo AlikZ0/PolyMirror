@@ -212,9 +212,8 @@ export class TraderService {
       if (!pass(r.tradeCount, f.minTrades)) return false;
       if (!pass(r.largestTrade, f.minTradeSize)) return false;
       if (!pass(r.pnl, f.minPnl)) return false;
-      if (!pass(r.roi, f.minRoi === undefined ? undefined : f.minRoi / 100)) return false;
-      if (!pass(r.winRate, f.minWinRate === undefined ? undefined : f.minWinRate / 100))
-        return false;
+      if (!pass(r.roi, f.minRoi)) return false; // ratio, e.g. 0.1 = 10%
+      if (!pass(r.winRate, f.minWinRate)) return false; // ratio 0..1
       if (!pass(r.averagePosition, f.minAveragePosition)) return false;
       if (f.maxDrawdown !== undefined && (r.maxDrawdown === null || r.maxDrawdown > f.maxDrawdown))
         return false;

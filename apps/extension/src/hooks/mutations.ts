@@ -24,10 +24,17 @@ export function useWatchlistMutations() {
     void qc.invalidateQueries({ queryKey: ['traders'] });
     void qc.invalidateQueries({ queryKey: queryKeys.dashboard });
   };
-  const add = useMutation({ mutationFn: (address: string) => api.addToWatchlist(address), onSuccess: invalidate });
-  const remove = useMutation({ mutationFn: (id: string) => api.removeFromWatchlist(id), onSuccess: invalidate });
+  const add = useMutation({
+    mutationFn: (address: string) => api.addToWatchlist(address),
+    onSuccess: invalidate,
+  });
+  const remove = useMutation({
+    mutationFn: (id: string) => api.removeFromWatchlist(id),
+    onSuccess: invalidate,
+  });
   const setStatus = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: WatchStatus }) => api.updateWatchlist(id, status),
+    mutationFn: ({ id, status }: { id: string; status: WatchStatus }) =>
+      api.updateWatchlist(id, status),
     onSuccess: invalidate,
   });
   return { add, remove, setStatus };

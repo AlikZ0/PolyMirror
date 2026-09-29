@@ -24,20 +24,20 @@ function findChromium(): string | undefined {
 
 export const test = base.extend<{ context: BrowserContext; extensionId: string }>({
   // eslint-disable-next-line no-empty-pattern
-  context: async ({}, use) => {
+  context: async ({}, provide) => {
     const context = await chromium.launchPersistentContext('', {
       headless: true, // new headless mode supports extensions
       executablePath: findChromium(),
       args: [`--disable-extensions-except=${E2E_DIST}`, `--load-extension=${E2E_DIST}`],
     });
-    await use(context);
+    await provide(context);
     await context.close();
   },
-  extensionId: async ({ context }, use) => {
+  extensionId: async ({ context }, provide) => {
     let [worker] = context.serviceWorkers();
     if (!worker) worker = await context.waitForEvent('serviceworker');
     const id = new URL(worker.url()).host;
-    await use(id);
+    await provide(id);
   },
 });
 

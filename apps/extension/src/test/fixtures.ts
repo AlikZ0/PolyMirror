@@ -4,8 +4,18 @@ export const WHALE = '0x1111111111111111111111111111111111111111';
 
 export const passingChecks: LimitCheck[] = [
   { code: 'MAX_COPY_AMOUNT', passed: true, state: 'pass', message: '$10 ≤ max per trade $20' },
-  { code: 'MAX_DAILY_COPY_VOLUME', passed: true, state: 'pass', message: '$10 of $100 daily limit' },
-  { code: 'MIN_BALANCE', passed: true, state: 'unknown', message: 'Balance cannot be checked in assisted mode' },
+  {
+    code: 'MAX_DAILY_COPY_VOLUME',
+    passed: true,
+    state: 'pass',
+    message: '$10 of $100 daily limit',
+  },
+  {
+    code: 'MIN_BALANCE',
+    passed: true,
+    state: 'unknown',
+    message: 'Balance cannot be checked in assisted mode',
+  },
 ];
 
 export function makeOrder(overrides: Partial<CopyOrder> = {}): CopyOrder {

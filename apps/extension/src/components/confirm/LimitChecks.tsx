@@ -14,7 +14,11 @@ export function LimitChecks({ checks }: { checks: LimitCheck[] }) {
       {checks.map((c, i) => {
         const icon = ICON[c.state] ?? ICON.unknown;
         return (
-          <li key={`${c.code}-${i}`} className="flex items-start gap-2 text-xs" data-state={c.state}>
+          <li
+            key={`${c.code}-${i}`}
+            className="flex items-start gap-2 text-xs"
+            data-state={c.state}
+          >
             <span
               className={cn('mt-px w-4 shrink-0 text-center font-bold', icon.className)}
               aria-label={icon.label}

@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import type { CopyOrder, CopyPreview } from '@polymirror/shared';
 import { Button, Callout, Modal, Spinner } from '@polymirror/ui';
-import { defaultCopyActions, useInvalidateCopyState, type CopyActions } from '../../hooks/mutations';
+import {
+  defaultCopyActions,
+  useInvalidateCopyState,
+  type CopyActions,
+} from '../../hooks/mutations';
 import { formatCountdown, useCountdown } from '../../hooks/useTimers';
 import { isApiError } from '../../services/apiClient';
 import { useOrderUpdatesStore } from '../../stores/orderUpdatesStore';
@@ -27,14 +31,21 @@ export interface ConfirmationModalProps {
 type Phase = 'review' | 'copying' | 'skipping' | 'skipped' | 'done';
 
 function newIdempotencyKey(): string {
-  return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return (
+    globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`
+  );
 }
 
 /**
  * "🐋 NEW WHALE TRADE" confirmation. A copy only happens when the user clicks COPY here.
  * Success is only claimed once the order status is CONFIRMED.
  */
-export function ConfirmationModal({ item, open, onClose, actions = defaultCopyActions }: ConfirmationModalProps) {
+export function ConfirmationModal({
+  item,
+  open,
+  onClose,
+  actions = defaultCopyActions,
+}: ConfirmationModalProps) {
   const { preview } = item;
   const invalidate = useInvalidateCopyState();
   const [phase, setPhase] = useState<Phase>('review');
@@ -109,14 +120,15 @@ export function ConfirmationModal({ item, open, onClose, actions = defaultCopyAc
     }
   };
 
-
   return (
     <Modal open={open} onClose={onClose} title="🐋 NEW WHALE TRADE" className="max-w-lg">
       <div className="flex flex-col gap-4" data-testid="confirmation-modal">
         <OrderDetails order={item.order} preview={preview} />
 
         <section aria-label="Limit checks" className="flex flex-col gap-1.5">
-          <h3 className="text-xs font-semibold tracking-wide text-muted uppercase">Safety checks</h3>
+          <h3 className="text-xs font-semibold tracking-wide text-muted uppercase">
+            Safety checks
+          </h3>
           <LimitChecks checks={preview.checks} />
         </section>
 
@@ -224,7 +236,16 @@ interface ResultViewProps {
   onClose: () => void;
 }
 
-function ResultView({ order, preview, reason, verifying, verifyRequested, onVerify, requestError, onClose }: ResultViewProps) {
+function ResultView({
+  order,
+  preview,
+  reason,
+  verifying,
+  verifyRequested,
+  onVerify,
+  requestError,
+  onClose,
+}: ResultViewProps) {
   if (order.status === 'CONFIRMED') {
     return (
       <div className="flex flex-col gap-3" role="status">

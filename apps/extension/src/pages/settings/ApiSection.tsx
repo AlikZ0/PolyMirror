@@ -1,7 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { SystemInfo } from '@polymirror/shared';
-import { Button, Callout, Card, CardContent, CardHeader, CardTitle, Field, Input } from '@polymirror/ui';
+import {
+  Button,
+  Callout,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Field,
+  Input,
+} from '@polymirror/ui';
 import { ConnectionDot } from '../../components/common/ConnectionStatus';
 import { errorMessage } from '../../components/common/QueryBoundary';
 import { DEFAULT_API_URL, stripTrailingSlash } from '../../config';
@@ -20,7 +29,8 @@ function isHttpUrl(v: string): boolean {
   }
 }
 
-type TestResult = { ok: true; info: SystemInfo; ms: number } | { ok: false; message: string } | null;
+type TestResult =
+  { ok: true; info: SystemInfo; ms: number } | { ok: false; message: string } | null;
 
 export function ApiSection() {
   const qc = useQueryClient();
@@ -65,7 +75,11 @@ export function ApiSection() {
     setTesting(true);
     const started = performance.now();
     try {
-      const client = createApiClient({ getBaseUrl: () => target, getToken: async () => null, timeoutMs: 8_000 });
+      const client = createApiClient({
+        getBaseUrl: () => target,
+        getToken: async () => null,
+        timeoutMs: 8_000,
+      });
       const info = await client.request<SystemInfo>('GET', '/api/system', { auth: false });
       setTest({ ok: true, info, ms: Math.round(performance.now() - started) });
     } catch (e) {
@@ -118,7 +132,8 @@ export function ApiSection() {
         </div>
         {test?.ok ? (
           <Callout variant="success" role="status">
-            Reachable in {test.ms} ms — v{test.info.version}, {test.info.mode} data, {test.info.execution} execution.
+            Reachable in {test.ms} ms — v{test.info.version}, {test.info.mode} data,{' '}
+            {test.info.execution} execution.
           </Callout>
         ) : test && !test.ok ? (
           <Callout variant="danger" role="alert">
@@ -131,8 +146,9 @@ export function ApiSection() {
         <hr className="border-border" />
         <div className="flex flex-col gap-2">
           <p className="text-xs text-muted">
-            The session token identifies this browser to PolyMirror. It is not a wallet key. Resetting
-            creates a new anonymous session (your settings and history on the server stay with the old one).
+            The session token identifies this browser to PolyMirror. It is not a wallet key.
+            Resetting creates a new anonymous session (your settings and history on the server stay
+            with the old one).
           </p>
           <div>
             <Button variant="danger" size="sm" onClick={() => void reset()}>

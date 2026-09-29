@@ -13,7 +13,10 @@ export default async function globalSetup(_config: FullConfig) {
     };
     const opts = { cwd: EXTENSION_ROOT, env, stdio: 'inherit' as const };
     execSync(`npx vite build --outDir "${E2E_DIST}" --logLevel warn`, opts);
-    execSync(`npx vite build -c vite.content.config.ts --outDir "${E2E_DIST}" --logLevel warn`, opts);
+    execSync(
+      `npx vite build -c vite.content.config.ts --outDir "${E2E_DIST}" --logLevel warn`,
+      opts,
+    );
   }
   const server = await startMockServer(MOCK_PORT);
   return async () => {

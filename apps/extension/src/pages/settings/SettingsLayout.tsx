@@ -20,7 +20,9 @@ export function SettingsLayout() {
             className={({ isActive }) =>
               cn(
                 '-mb-px border-b-2 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-                isActive ? 'border-accent font-medium text-fg' : 'border-transparent text-muted hover:text-fg',
+                isActive
+                  ? 'border-accent font-medium text-fg'
+                  : 'border-transparent text-muted hover:text-fg',
               )
             }
           >

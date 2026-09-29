@@ -30,10 +30,21 @@ export function toneOf(value: number | null | undefined): Tone {
   return value > 0 ? 'positive' : 'negative';
 }
 
-export function StatCard({ label, value, delta, tone = 'neutral', icon, className, loading }: StatCardProps) {
+export function StatCard({
+  label,
+  value,
+  delta,
+  tone = 'neutral',
+  icon,
+  className,
+  loading,
+}: StatCardProps) {
   return (
     <div
-      className={cn('flex flex-col gap-1 rounded-lg border border-border bg-surface px-3 py-3', className)}
+      className={cn(
+        'flex flex-col gap-1 rounded-lg border border-border bg-surface px-3 py-3',
+        className,
+      )}
     >
       <div className="flex items-center justify-between gap-2 text-xs text-muted">
         <span>{label}</span>

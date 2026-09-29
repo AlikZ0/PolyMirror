@@ -10,7 +10,9 @@ export function DemoBadge({ compact = false }: { compact?: boolean }) {
       <Badge variant="demo" data-testid="demo-badge">
         DEMO MODE
       </Badge>
-      {compact ? null : <span className="text-xs font-medium text-demo">no real trades are executed</span>}
+      {compact ? null : (
+        <span className="text-xs font-medium text-demo">no real trades are executed</span>
+      )}
     </div>
   );
 }

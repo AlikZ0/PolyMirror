@@ -69,7 +69,12 @@ export function HistoricalTradesTab({ address }: { address: string }) {
     }
   };
   const head = (key: SortKey, label: string, right = false) => (
-    <SortableHead active={sortBy === key} direction={sortDirection} onSort={() => sort(key)} className={right ? 'text-right' : undefined}>
+    <SortableHead
+      active={sortBy === key}
+      direction={sortDirection}
+      onSort={() => sort(key)}
+      className={right ? 'text-right' : undefined}
+    >
       {label}
     </SortableHead>
   );
@@ -106,16 +111,40 @@ export function HistoricalTradesTab({ address }: { address: string }) {
           />
         </Field>
         <Field label="From" htmlFor={`${id}-from`}>
-          <Input id={`${id}-from`} type="date" value={from} max={to || undefined} onChange={(e) => { setFrom(e.target.value); setPage(1); }} />
+          <Input
+            id={`${id}-from`}
+            type="date"
+            value={from}
+            max={to || undefined}
+            onChange={(e) => {
+              setFrom(e.target.value);
+              setPage(1);
+            }}
+          />
         </Field>
         <Field label="To" htmlFor={`${id}-to`}>
-          <Input id={`${id}-to`} type="date" value={to} min={from || undefined} onChange={(e) => { setTo(e.target.value); setPage(1); }} />
+          <Input
+            id={`${id}-to`}
+            type="date"
+            value={to}
+            min={from || undefined}
+            onChange={(e) => {
+              setTo(e.target.value);
+              setPage(1);
+            }}
+          />
         </Field>
       </div>
       <QueryBoundary
         query={query}
         isEmpty={(d) => d.items.length === 0}
-        empty={<EmptyState icon="📄" title="No trades found" description="Adjust the search, status or date range." />}
+        empty={
+          <EmptyState
+            icon="📄"
+            title="No trades found"
+            description="Adjust the search, status or date range."
+          />
+        }
       >
         {(data) => (
           <div className="flex flex-col gap-3" aria-busy={query.isFetching}>
@@ -139,16 +168,26 @@ export function HistoricalTradesTab({ address }: { address: string }) {
                     <TableCell className="text-xs text-muted">{formatDateTime(r.date)}</TableCell>
                     <TableCell className="max-w-72 truncate" title={r.market ?? undefined}>
                       {r.market ?? 'N/A'}
-                      {r.outcome ? <span className="ml-1 text-xs text-muted">· {r.outcome}</span> : null}
+                      {r.outcome ? (
+                        <span className="ml-1 text-xs text-muted">· {r.outcome}</span>
+                      ) : null}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={r.side === 'BUY' ? 'positive' : r.side === 'SELL' ? 'negative' : 'muted'}>
+                      <Badge
+                        variant={
+                          r.side === 'BUY' ? 'positive' : r.side === 'SELL' ? 'negative' : 'muted'
+                        }
+                      >
                         {r.side}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">{formatPrice(r.entry)}</TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatPrice(r.entry)}
+                    </TableCell>
                     <TableCell className="text-right tabular-nums">{formatPrice(r.exit)}</TableCell>
-                    <TableCell className="text-right tabular-nums">{formatUsd(r.positionSize)}</TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatUsd(r.positionSize)}
+                    </TableCell>
                     <TableCell className="text-right">
                       <Pnl value={r.pnl} />
                     </TableCell>
@@ -162,7 +201,13 @@ export function HistoricalTradesTab({ address }: { address: string }) {
                 ))}
               </TableBody>
             </Table>
-            <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={setPage} disabled={query.isFetching} />
+            <Pagination
+              page={data.page}
+              pageSize={data.pageSize}
+              total={data.total}
+              onPageChange={setPage}
+              disabled={query.isFetching}
+            />
           </div>
         )}
       </QueryBoundary>

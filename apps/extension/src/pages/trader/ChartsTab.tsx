@@ -17,14 +17,32 @@ export function ChartsTab({ address, period }: { address: string; period: TimePe
         <div className="flex flex-col gap-4">
           <AnalyticsNotes notes={a.notes} />
           <div className="grid gap-4 lg:grid-cols-2">
-            <AreaSeriesChart title="Cumulative P/L" seriesName="Cumulative P/L" data={a.charts.cumulativePnl} />
+            <AreaSeriesChart
+              title="Cumulative P/L"
+              seriesName="Cumulative P/L"
+              data={a.charts.cumulativePnl}
+            />
             <BarSeriesChart title="Daily P/L" seriesName="P/L" data={a.charts.dailyPnl} signed />
             <BarSeriesChart title="Trade volume" seriesName="Volume" data={a.charts.dailyVolume} />
-            <BarSeriesChart title="Number of trades" seriesName="Trades" data={a.charts.dailyTrades} kind="count" />
-            <DistributionBars title="Win / Loss distribution" data={a.charts.winLoss} colorFor={winLossColor} />
+            <BarSeriesChart
+              title="Number of trades"
+              seriesName="Trades"
+              data={a.charts.dailyTrades}
+              kind="count"
+            />
+            <DistributionBars
+              title="Win / Loss distribution"
+              data={a.charts.winLoss}
+              colorFor={winLossColor}
+            />
             <DistributionBars title="Position size distribution" data={a.charts.positionSizes} />
             <DistributionPie title="Category distribution" data={a.charts.categories} />
-            <AreaSeriesChart title="Drawdown" seriesName="Drawdown" data={a.charts.drawdown} color={CHART.negative} />
+            <AreaSeriesChart
+              title="Drawdown"
+              seriesName="Drawdown"
+              data={a.charts.drawdown}
+              color={CHART.negative}
+            />
           </div>
         </div>
       )}

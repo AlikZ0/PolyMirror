@@ -41,7 +41,12 @@ describe('ConfirmationModal', () => {
         allowed: false,
         checks: [
           ...passingChecks,
-          { code: 'MAX_OPEN_POSITIONS', passed: false, state: 'fail', message: 'Daily limit of $100 reached' },
+          {
+            code: 'MAX_OPEN_POSITIONS',
+            passed: false,
+            state: 'fail',
+            message: 'Daily limit of $100 reached',
+          },
         ],
       }),
     });
@@ -95,11 +100,18 @@ describe('ConfirmationModal', () => {
   });
 
   it('does not claim success for an assisted order that is only SUBMITTED', async () => {
-    const verify = vi.fn(async () => ({ order: makeOrder({ status: 'SUBMITTED', execution: 'assisted' }) }));
+    const verify = vi.fn(async () => ({
+      order: makeOrder({ status: 'SUBMITTED', execution: 'assisted' }),
+    }));
     setup(
-      { order: makeOrder({ execution: 'assisted' }), preview: makePreview({ execution: 'assisted' }) },
       {
-        confirm: vi.fn(async () => ({ order: makeOrder({ status: 'SUBMITTED', execution: 'assisted' }) })),
+        order: makeOrder({ execution: 'assisted' }),
+        preview: makePreview({ execution: 'assisted' }),
+      },
+      {
+        confirm: vi.fn(async () => ({
+          order: makeOrder({ status: 'SUBMITTED', execution: 'assisted' }),
+        })),
         verify,
       },
     );

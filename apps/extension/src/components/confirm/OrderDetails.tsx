@@ -1,13 +1,33 @@
 import type { ReactNode } from 'react';
 import type { CopyOrder, CopyPreview } from '@polymirror/shared';
 import { Badge } from '@polymirror/ui';
-import { formatAmount, formatNumber, formatPrice, formatUsd, shortAddress } from '../../utils/format';
+import {
+  formatAmount,
+  formatNumber,
+  formatPrice,
+  formatUsd,
+  shortAddress,
+} from '../../utils/format';
 
-function Row({ label, children, strong }: { label: string; children: ReactNode; strong?: boolean }) {
+function Row({
+  label,
+  children,
+  strong,
+}: {
+  label: string;
+  children: ReactNode;
+  strong?: boolean;
+}) {
   return (
     <div className="flex items-baseline justify-between gap-3 py-1">
       <dt className="text-xs text-muted">{label}</dt>
-      <dd className={strong ? 'text-base font-bold text-positive tabular-nums' : 'text-sm tabular-nums text-right'}>
+      <dd
+        className={
+          strong
+            ? 'text-base font-bold text-positive tabular-nums'
+            : 'text-sm tabular-nums text-right'
+        }
+      >
         {children}
       </dd>
     </div>
