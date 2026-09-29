@@ -27,7 +27,10 @@ export class DemoExecutionAdapter implements ExecutionAdapter {
     const price = await this.priceOf(order.tokenId);
     if (price === null) return { status: 'rejected', reason: 'Market unavailable (simulated)' };
     if (unitHash(`reject|${order.id}`) < (this.options.rejectRate ?? 0.04)) {
-      return { status: 'rejected', reason: 'Insufficient liquidity at the requested price (simulated)' };
+      return {
+        status: 'rejected',
+        reason: 'Insufficient liquidity at the requested price (simulated)',
+      };
     }
     const shares = floorTo(order.amount / price, 4);
     this.ledger.set(order.id, { price, shares, at: (this.options.now ?? Date.now)() });
@@ -36,7 +39,8 @@ export class DemoExecutionAdapter implements ExecutionAdapter {
 
   async verify(order: CopyOrder): Promise<VerifyResult> {
     const fill = this.ledger.get(order.id);
-    if (!fill) return { status: 'failed', reason: 'Simulated order not found (demo state was reset)' };
+    if (!fill)
+      return { status: 'failed', reason: 'Simulated order not found (demo state was reset)' };
     return {
       status: 'confirmed',
       fillPrice: fill.price,

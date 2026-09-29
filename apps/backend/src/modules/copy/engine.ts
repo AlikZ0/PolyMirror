@@ -61,7 +61,9 @@ export class CopyEngine {
       try {
         await this.propose(userId, trade);
       } catch (err) {
-        await this.store.audit(userId, 'copy.propose_error', trade.dbId, { message: (err as Error).message });
+        await this.store.audit(userId, 'copy.propose_error', trade.dbId, {
+          message: (err as Error).message,
+        });
       }
     }
   }
@@ -92,7 +94,10 @@ export class CopyEngine {
       status: 'PENDING',
       execution: this.execution.kind,
       failureReason: null,
-      expiresAt: Math.min(trade.timestamp + this.config.maxTradeAgeMs, now + (this.config.proposalTtlMs ?? COPY_PROPOSAL_TTL_MS)),
+      expiresAt: Math.min(
+        trade.timestamp + this.config.maxTradeAgeMs,
+        now + (this.config.proposalTtlMs ?? COPY_PROPOSAL_TTL_MS),
+      ),
     });
     // Duplicate detection: the same whale trade never produces a second proposal.
     if (!created) return order;
@@ -101,7 +106,12 @@ export class CopyEngine {
     const failed = failedChecks(preview.checks);
     const filter = failed.find((c) => FILTER_CODES.includes(c.code));
     if (filter) {
-      return (await this.store.transition(order.id, ['PENDING'], { status: 'SKIPPED', failureReason: `Filtered: ${filter.message}` })) ?? order;
+      return (
+        (await this.store.transition(order.id, ['PENDING'], {
+          status: 'SKIPPED',
+          failureReason: `Filtered: ${filter.message}`,
+        })) ?? order
+      );
     }
     if (failed.length > 0) {
       const cancelled =
@@ -130,10 +140,17 @@ export class CopyEngine {
 
   /** Automatic execution needs explicit opt-in AND a venue that can execute without a human. */
   private automaticAllowed(settings: CopySettings): boolean {
-    return settings.mode === 'AUTOMATIC' && !settings.confirmationRequired && this.execution.supportsProgrammaticExecution;
+    return (
+      settings.mode === 'AUTOMATIC' &&
+      !settings.confirmationRequired &&
+      this.execution.supportsProgrammaticExecution
+    );
   }
 
-  async preview(userId: string, input: { copyOrderId?: string; sourceTradeId?: string }): Promise<CopyPreview> {
+  async preview(
+    userId: string,
+    input: { copyOrderId?: string; sourceTradeId?: string },
+  ): Promise<CopyPreview> {
     let order: CopyOrderRecord | null = null;
     if (input.copyOrderId) order = await this.store.getOrder(input.copyOrderId);
     if (!order && input.sourceTradeId) {
@@ -177,12 +194,18 @@ export class CopyEngine {
     };
   }
 
-  private async evaluate(order: CopyOrderRecord, settings: CopySettings, opts: { userConfirmed: boolean }) {
+  private async evaluate(
+    order: CopyOrderRecord,
+    settings: CopySettings,
+    opts: { userConfirmed: boolean },
+  ) {
     const now = this.now();
     const exposure = await this.store.exposure(order.userId, dayStartUtc(now), order.id);
     const [currentPrice, marketState, balance] = await Promise.all([
       this.market.getCurrentPrice(order.tokenId).catch(() => null),
-      this.market.getMarketState(order.conditionId).catch(() => ({ active: null, url: null, category: null })),
+      this.market
+        .getMarketState(order.conditionId)
+        .catch(() => ({ active: null, url: null, category: null })),
       this.execution
         .getBalance({
           userId: order.userId,
@@ -226,7 +249,8 @@ export class CopyEngine {
     // Replay of the same confirmation request returns the original result.
     const replay = await this.store.getOrderByConfirmKey(input.idempotencyKey);
     if (replay) {
-      if (replay.userId !== userId || replay.id !== input.copyOrderId) throw conflict('Idempotency key already used');
+      if (replay.userId !== userId || replay.id !== input.copyOrderId)
+        throw conflict('Idempotency key already used');
       return replay;
     }
     return this.execute(userId, input.copyOrderId, {
@@ -243,7 +267,8 @@ export class CopyEngine {
       status: 'SKIPPED',
       failureReason: reason ? `Skipped: ${reason}` : 'Skipped by user',
     });
-    if (!skipped) throw conflict(`Order is ${order.status.toLowerCase()} and can no longer be skipped`);
+    if (!skipped)
+      throw conflict(`Order is ${order.status.toLowerCase()} and can no longer be skipped`);
     await this.store.audit(userId, 'copy.skip', order.id, { reason });
     return skipped;
   }
@@ -260,21 +285,33 @@ export class CopyEngine {
         throw conflict(`Order is already ${order.status.toLowerCase()}`, { status: order.status });
       }
       if (order.expiresAt <= this.now()) {
-        await this.store.transition(order.id, ['PENDING'], { status: 'CANCELLED', failureReason: 'Proposal expired' });
+        await this.store.transition(order.id, ['PENDING'], {
+          status: 'CANCELLED',
+          failureReason: 'Proposal expired',
+        });
         throw conflict('This trade is no longer fresh enough to copy — the proposal expired');
       }
-      if (opts.expectedAmount !== undefined && Math.abs(opts.expectedAmount - order.amount) > 1e-6) {
-        throw conflict('The order amount changed since you reviewed it. Please review again.', { amount: order.amount });
+      if (
+        opts.expectedAmount !== undefined &&
+        Math.abs(opts.expectedAmount - order.amount) > 1e-6
+      ) {
+        throw conflict('The order amount changed since you reviewed it. Please review again.', {
+          amount: order.amount,
+        });
       }
       const settings = await this.store.getSettings(userId);
       if (order.execution === 'assisted' && !settings.walletAddress) {
-        throw badRequest('Set your public Polymarket wallet address in Copy Settings so the fill can be verified.');
+        throw badRequest(
+          'Set your public Polymarket wallet address in Copy Settings so the fill can be verified.',
+        );
       }
       // All limits are re-checked right before the order is sent.
       const { checks } = await this.evaluate(order, settings, { userConfirmed: !opts.automatic });
       const ok = canExecute(checks, opts.automatic);
       if (!ok) {
-        const failed = checks.filter((c) => (opts.automatic ? c.state !== 'pass' : c.state === 'fail'));
+        const failed = checks.filter((c) =>
+          opts.automatic ? c.state !== 'pass' : c.state === 'fail',
+        );
         if (opts.automatic) {
           // Unattended: leave the proposal for the user to review.
           await this.store.audit(userId, 'copy.auto_blocked', order.id, { checks: failed });
@@ -289,10 +326,15 @@ export class CopyEngine {
         confirmIdempotencyKey: opts.idempotencyKey ?? null,
       });
       if (!next) throw conflict('Order was modified concurrently');
-      await this.store.audit(userId, opts.automatic ? 'copy.auto_execute' : 'copy.confirm', order.id, {
-        amount: order.amount,
-        checks: checks.map((c) => ({ code: c.code, state: c.state })),
-      });
+      await this.store.audit(
+        userId,
+        opts.automatic ? 'copy.auto_execute' : 'copy.confirm',
+        order.id,
+        {
+          amount: order.amount,
+          checks: checks.map((c) => ({ code: c.code, state: c.state })),
+        },
+      );
       return next;
     });
     if (!executing) {
@@ -305,7 +347,10 @@ export class CopyEngine {
     try {
       result = await this.execution.submit(executing, { walletAddress: settings.walletAddress });
     } catch (err) {
-      result = { status: 'rejected' as const, reason: err instanceof AppError ? err.message : 'Execution venue error' };
+      result = {
+        status: 'rejected' as const,
+        reason: err instanceof AppError ? err.message : 'Execution venue error',
+      };
     }
 
     if (result.status === 'rejected') {
@@ -328,12 +373,16 @@ export class CopyEngine {
     const settings = await this.store.getSettings(userId);
     let result;
     try {
-      result = await this.execution.verify(order, { walletAddress: settings.walletAddress, now: this.now() });
+      result = await this.execution.verify(order, {
+        walletAddress: settings.walletAddress,
+        now: this.now(),
+      });
     } catch {
       return order; // Transient: try again on the next maintenance run.
     }
     if (result.status === 'pending') return order;
-    if (result.status === 'failed') return this.fail(userId, order, result.reason ?? 'Fill could not be verified');
+    if (result.status === 'failed')
+      return this.fail(userId, order, result.reason ?? 'Fill could not be verified');
 
     const fillPrice = result.fillPrice ?? order.whalePrice;
     const shares = result.filledShares ?? estimateShares(order.amount, fillPrice);
@@ -357,14 +406,24 @@ export class CopyEngine {
       traderAddress: confirmed.traderAddress,
       copyOrderId: confirmed.id,
     });
-    await this.store.audit(userId, 'copy.confirmed', order.id, { fillPrice, shares, tx: result.transactionHash ?? null });
+    await this.store.audit(userId, 'copy.confirmed', order.id, {
+      fillPrice,
+      shares,
+      tx: result.transactionHash ?? null,
+    });
     return confirmed;
   }
 
-  private async fail(userId: string, order: CopyOrderRecord, reason: string): Promise<CopyOrderRecord> {
+  private async fail(
+    userId: string,
+    order: CopyOrderRecord,
+    reason: string,
+  ): Promise<CopyOrderRecord> {
     const failed =
-      (await this.store.transition(order.id, [...IN_FLIGHT], { status: 'FAILED', failureReason: reason })) ??
-      (await this.store.getOrder(order.id))!;
+      (await this.store.transition(order.id, [...IN_FLIGHT], {
+        status: 'FAILED',
+        failureReason: reason,
+      })) ?? (await this.store.getOrder(order.id))!;
     this.events.emit(userId, 'copy.failed', { order: publicOrder(failed), reason });
     await this.events.notify(userId, {
       type: 'COPY_FAILED',
@@ -381,13 +440,28 @@ export class CopyEngine {
     const codes = new Set(failed.map((c) => c.code));
     const base = { traderAddress: order.traderAddress, copyOrderId: order.id };
     if (codes.has('MAX_DAILY_COPY_VOLUME')) {
-      await this.events.notify(userId, { ...base, type: 'DAILY_LIMIT_REACHED', title: 'Daily limit reached', message: failed.find((c) => c.code === 'MAX_DAILY_COPY_VOLUME')!.message });
+      await this.events.notify(userId, {
+        ...base,
+        type: 'DAILY_LIMIT_REACHED',
+        title: 'Daily limit reached',
+        message: failed.find((c) => c.code === 'MAX_DAILY_COPY_VOLUME')!.message,
+      });
     }
     if (codes.has('MIN_BALANCE')) {
-      await this.events.notify(userId, { ...base, type: 'INSUFFICIENT_BALANCE', title: 'Insufficient balance', message: failed.find((c) => c.code === 'MIN_BALANCE')!.message });
+      await this.events.notify(userId, {
+        ...base,
+        type: 'INSUFFICIENT_BALANCE',
+        title: 'Insufficient balance',
+        message: failed.find((c) => c.code === 'MIN_BALANCE')!.message,
+      });
     }
     if (codes.has('MARKET_UNAVAILABLE')) {
-      await this.events.notify(userId, { ...base, type: 'MARKET_UNAVAILABLE', title: 'Market unavailable', message: `"${order.marketTitle ?? 'Market'}" is closed or unavailable` });
+      await this.events.notify(userId, {
+        ...base,
+        type: 'MARKET_UNAVAILABLE',
+        title: 'Market unavailable',
+        message: `"${order.marketTitle ?? 'Market'}" is closed or unavailable`,
+      });
     }
   }
 
@@ -396,7 +470,12 @@ export class CopyEngine {
   // -------------------------------------------------------------------------
 
   /** Expires stale proposals, verifies submitted orders, and marks open copies to market. */
-  async runMaintenance(): Promise<{ expired: number; verified: number; failed: number; marked: number }> {
+  async runMaintenance(): Promise<{
+    expired: number;
+    verified: number;
+    failed: number;
+    marked: number;
+  }> {
     const now = this.now();
     let expired = 0;
     let verified = 0;
@@ -405,14 +484,20 @@ export class CopyEngine {
 
     for (const order of await this.store.listByStatus(['PENDING'], 500)) {
       if (order.expiresAt > now) continue;
-      const done = await this.store.transition(order.id, ['PENDING'], { status: 'CANCELLED', failureReason: 'Proposal expired' });
+      const done = await this.store.transition(order.id, ['PENDING'], {
+        status: 'CANCELLED',
+        failureReason: 'Proposal expired',
+      });
       if (done) expired++;
     }
 
     for (const order of await this.store.listByStatus(['SUBMITTED'], 200)) {
       const after = await this.verify(order.userId, order.id);
       if (after.status === 'CONFIRMED') verified++;
-      else if (after.status === 'SUBMITTED' && now - (order.executedAt ?? order.createdAt) > this.config.assistedVerifyTimeoutMs) {
+      else if (
+        after.status === 'SUBMITTED' &&
+        now - (order.executedAt ?? order.createdAt) > this.config.assistedVerifyTimeoutMs
+      ) {
         await this.fail(
           order.userId,
           order,
@@ -434,7 +519,8 @@ export class CopyEngine {
       if (order.filledShares === null) continue;
       const state = await this.market.getMarketState(order.conditionId).catch(() => null);
       const resolved = state?.resolvedPrice?.(order.tokenId) ?? null;
-      const price = resolved ?? (await this.market.getCurrentPrice(order.tokenId).catch(() => null));
+      const price =
+        resolved ?? (await this.market.getCurrentPrice(order.tokenId).catch(() => null));
       if (price === null) continue;
       await this.store.update(order.id, {
         currentPrice: price,

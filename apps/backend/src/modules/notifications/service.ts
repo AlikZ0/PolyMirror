@@ -1,4 +1,9 @@
-import type { NotificationItem, NotificationType, WsEventName, WsPayloads } from '@polymirror/shared';
+import type {
+  NotificationItem,
+  NotificationType,
+  WsEventName,
+  WsPayloads,
+} from '@polymirror/shared';
 import type { Notification as DbNotification } from '@prisma/client';
 import type { Db } from '../../database/prisma';
 import type { WsHub } from '../../websocket/hub';
@@ -27,7 +32,13 @@ export class NotificationService implements CopyEventsPort {
 
   async notify(
     userId: string,
-    n: { type: NotificationType; title: string; message: string; traderAddress?: string | null; copyOrderId?: string | null },
+    n: {
+      type: NotificationType;
+      title: string;
+      message: string;
+      traderAddress?: string | null;
+      copyOrderId?: string | null;
+    },
   ): Promise<void> {
     const row = await this.db.notification.create({
       data: {
@@ -44,7 +55,11 @@ export class NotificationService implements CopyEventsPort {
 
   async list(userId: string, limit = 50) {
     const [rows, unread] = await Promise.all([
-      this.db.notification.findMany({ where: { userId }, orderBy: { createdAt: 'desc' }, take: limit }),
+      this.db.notification.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+      }),
       this.db.notification.count({ where: { userId, read: false } }),
     ]);
     return { items: rows.map(toNotification), unread };

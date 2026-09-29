@@ -16,7 +16,9 @@ export function registerErrorHandler(app: FastifyInstance) {
       body = {
         error: {
           code: 'BAD_REQUEST',
-          message: err.issues.map((i) => `${i.path.join('.') || 'request'}: ${i.message}`).join('; '),
+          message: err.issues
+            .map((i) => `${i.path.join('.') || 'request'}: ${i.message}`)
+            .join('; '),
           details: err.issues,
         },
       };
@@ -34,6 +36,8 @@ export function registerErrorHandler(app: FastifyInstance) {
   });
 
   app.setNotFoundHandler((_req, reply) => {
-    void reply.status(404).send({ error: { code: 'NOT_FOUND', message: 'Route not found' } } satisfies ApiErrorBody);
+    void reply
+      .status(404)
+      .send({ error: { code: 'NOT_FOUND', message: 'Route not found' } } satisfies ApiErrorBody);
   });
 }

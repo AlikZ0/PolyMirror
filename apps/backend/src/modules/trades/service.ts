@@ -11,12 +11,21 @@ export class TradeService {
     private readonly markets: MarketService,
   ) {}
 
-  async ensureTrader(address: string, profile?: { userName: string | null; profileImage: string | null } | null) {
+  async ensureTrader(
+    address: string,
+    profile?: { userName: string | null; profileImage: string | null } | null,
+  ) {
     const a = address.toLowerCase();
     return this.db.trader.upsert({
       where: { address: a },
-      create: { address: a, userName: profile?.userName ?? null, profileImage: profile?.profileImage ?? null },
-      update: profile?.userName ? { userName: profile.userName, profileImage: profile.profileImage } : {},
+      create: {
+        address: a,
+        userName: profile?.userName ?? null,
+        profileImage: profile?.profileImage ?? null,
+      },
+      update: profile?.userName
+        ? { userName: profile.userName, profileImage: profile.profileImage }
+        : {},
     });
   }
 
@@ -24,7 +33,12 @@ export class TradeService {
   async ingest(traderId: string, fills: readonly TradeFill[]): Promise<StoredTrade[]> {
     if (fills.length === 0) return [];
     const known = new Set(
-      (await this.db.trade.findMany({ where: { sourceId: { in: fills.map((f) => f.id) } }, select: { sourceId: true } })).map((r) => r.sourceId),
+      (
+        await this.db.trade.findMany({
+          where: { sourceId: { in: fills.map((f) => f.id) } },
+          select: { sourceId: true },
+        })
+      ).map((r) => r.sourceId),
     );
     const fresh = fills.filter((f) => !known.has(f.id));
     if (fresh.length === 0) return [];

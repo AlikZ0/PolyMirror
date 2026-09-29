@@ -60,13 +60,18 @@ export interface ApiRoutes {
   'DELETE /api/watchlist/:id': { response: { ok: true } };
   'GET /api/copy/settings': { response: CopySettings };
   'PUT /api/copy/settings': { body: Omit<CopySettings, 'updatedAt'>; response: CopySettings };
-  'GET /api/copy/pending': { response: { items: Array<{ order: CopyOrder; preview: CopyPreview }> } };
+  'GET /api/copy/pending': {
+    response: { items: Array<{ order: CopyOrder; preview: CopyPreview }> };
+  };
   'POST /api/copy/preview': { body: { sourceTradeId: string }; response: CopyPreview };
   'POST /api/copy/confirm': {
     body: { copyOrderId: string; confirm: true; expectedAmount: number; idempotencyKey: string };
     response: { order: CopyOrder };
   };
-  'POST /api/copy/skip': { body: { copyOrderId: string; reason?: string }; response: { order: CopyOrder } };
+  'POST /api/copy/skip': {
+    body: { copyOrderId: string; reason?: string };
+    response: { order: CopyOrder };
+  };
   /** Assisted mode: the user says they placed the order on Polymarket; triggers verification. */
   'POST /api/copy/verify': { body: { copyOrderId: string }; response: { order: CopyOrder } };
   /** Query: page, pageSize, status, traderAddress */

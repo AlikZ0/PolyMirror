@@ -47,7 +47,8 @@ export class WsHub {
   }
 
   closeAll(): void {
-    for (const set of this.sockets.values()) for (const s of set) s.close(1001, 'Server shutting down');
+    for (const set of this.sockets.values())
+      for (const s of set) s.close(1001, 'Server shutting down');
     this.sockets.clear();
   }
 }

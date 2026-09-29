@@ -11,7 +11,9 @@ import type { AppContext } from '../../context';
 const addressParams = z.object({ address: evmAddressSchema });
 
 export async function traderRoutes(app: FastifyInstance, ctx: AppContext) {
-  app.get('/api/traders', async (req) => ctx.traders.scan(req.userId, scannerFiltersSchema.parse(req.query)));
+  app.get('/api/traders', async (req) =>
+    ctx.traders.scan(req.userId, scannerFiltersSchema.parse(req.query)),
+  );
 
   app.get('/api/traders/:address', async (req) => {
     const { address } = addressParams.parse(req.params);

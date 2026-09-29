@@ -306,13 +306,19 @@ export function computeTraderAnalytics(input: {
   const notes = [...(input.notes ?? [])];
 
   if (performance.closedPositions === 0) {
-    notes.push('No closed positions in this period: win rate, average/median P/L and drawdown are N/A.');
+    notes.push(
+      'No closed positions in this period: win rate, average/median P/L and drawdown are N/A.',
+    );
   }
   if (positions.some((p) => p.openedAt === null)) {
-    notes.push('Some positions have no known entry time; holding time uses only positions with both entry and exit times.');
+    notes.push(
+      'Some positions have no known entry time; holding time uses only positions with both entry and exit times.',
+    );
   }
   if (fills.some((f) => f.category === null)) {
-    notes.push('Some markets have no category in the source data and are shown as "Uncategorized".');
+    notes.push(
+      'Some markets have no category in the source data and are shown as "Uncategorized".',
+    );
   }
 
   return {
@@ -346,7 +352,9 @@ export function summarizeTrader(
     winRate: analytics.performance.winRate,
     maxDrawdown: analytics.risk.maxDrawdown,
     lastActive: last,
-    categories: analytics.charts.categories.map((c) => c.label).filter((l) => l !== 'Uncategorized'),
+    categories: analytics.charts.categories
+      .map((c) => c.label)
+      .filter((l) => l !== 'Uncategorized'),
     active: last === null ? false : now - last <= INACTIVE_AFTER_MS,
     enriched: true,
     isWatched,

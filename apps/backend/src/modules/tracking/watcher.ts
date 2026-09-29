@@ -50,26 +50,39 @@ export class TradeWatcher {
         where: { watchlist: { some: { status: 'ACTIVE' } } },
         select: { id: true, address: true, lastPolledAt: true, lastTradeAt: true },
       });
-      const counts = await mapLimit(traders, 3, (t) => this.pollTrader(t, now).catch((err: Error) => {
-        this.log.warn({ err: err.message, trader: t.address }, 'watcher poll failed');
-        return 0;
-      }));
+      const counts = await mapLimit(traders, 3, (t) =>
+        this.pollTrader(t, now).catch((err: Error) => {
+          this.log.warn({ err: err.message, trader: t.address }, 'watcher poll failed');
+          return 0;
+        }),
+      );
       return counts.reduce((a, b) => a + b, 0);
     } finally {
       this.running = false;
     }
   }
 
-  private async pollTrader(t: { id: string; address: string; lastPolledAt: Date | null; lastTradeAt: Date | null }, now: number) {
+  private async pollTrader(
+    t: { id: string; address: string; lastPolledAt: Date | null; lastTradeAt: Date | null },
+    now: number,
+  ) {
     const since = (t.lastPolledAt?.getTime() ?? now - this.options.intervalMs) - OVERLAP_MS;
     const fills = await this.adapter.getTraderFills(t.address, { since, maxFills: 200 });
-    const fresh = await this.trades.ingest(t.id, [...fills].sort((a, b) => a.timestamp - b.timestamp));
-    const newest = fills.reduce<number | null>((m, f) => (m === null || f.timestamp > m ? f.timestamp : m), null);
+    const fresh = await this.trades.ingest(
+      t.id,
+      [...fills].sort((a, b) => a.timestamp - b.timestamp),
+    );
+    const newest = fills.reduce<number | null>(
+      (m, f) => (m === null || f.timestamp > m ? f.timestamp : m),
+      null,
+    );
     await this.db.trader.update({
       where: { id: t.id },
       data: {
         lastPolledAt: new Date(now),
-        ...(newest !== null && (!t.lastTradeAt || newest > t.lastTradeAt.getTime()) ? { lastTradeAt: new Date(newest) } : {}),
+        ...(newest !== null && (!t.lastTradeAt || newest > t.lastTradeAt.getTime())
+          ? { lastTradeAt: new Date(newest) }
+          : {}),
       },
     });
 
@@ -81,15 +94,24 @@ export class TradeWatcher {
 
     if (fresh.length > 0) {
       this.onNewTrades(t.address);
-      await this.db.watchlist.updateMany({ where: { traderId: t.id, status: 'ACTIVE' }, data: { newTrades: { increment: fresh.length } } });
+      await this.db.watchlist.updateMany({
+        where: { traderId: t.id, status: 'ACTIVE' },
+        data: { newTrades: { increment: fresh.length } },
+      });
       for (const trade of fresh) {
         for (const userId of userIds) {
-          this.events.emit(userId, 'trader.trade', { trade, traderAddress: t.address, detectedAt: now });
+          this.events.emit(userId, 'trader.trade', {
+            trade,
+            traderAddress: t.address,
+            detectedAt: now,
+          });
         }
         // Only fresh trades become copy proposals; late-discovered ones are informational.
         // Trades that happened before a user followed the trader are never proposed to them.
         if (now - trade.timestamp <= this.options.maxTradeAgeMs) {
-          const eligible = watchers.filter((w) => trade.timestamp >= w.createdAt.getTime()).map((w) => w.userId);
+          const eligible = watchers
+            .filter((w) => trade.timestamp >= w.createdAt.getTime())
+            .map((w) => w.userId);
           if (eligible.length) await this.engine.onWhaleTrade(trade, eligible);
         }
       }
@@ -101,7 +123,11 @@ export class TradeWatcher {
         const key = `${userId}|${t.address}`;
         if (now - (this.inactiveNotified.get(key) ?? 0) < DAY_MS) continue;
         this.inactiveNotified.set(key, now);
-        this.events.emit(userId, 'trader.status', { traderAddress: t.address, status: 'INACTIVE', lastTradeAt });
+        this.events.emit(userId, 'trader.status', {
+          traderAddress: t.address,
+          status: 'INACTIVE',
+          lastTradeAt,
+        });
         await this.events.notify(userId, {
           type: 'TRADER_INACTIVE',
           title: 'Trader inactive',

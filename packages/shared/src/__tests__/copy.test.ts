@@ -53,7 +53,10 @@ describe('Percentage calculation', () => {
 
 describe('Maximum trade limit', () => {
   it('clamps the computed amount to maxPerTrade', () => {
-    const r = calculateCopyAmount({ ...base, sizingMode: 'PERCENTAGE', percentage: 1, maxPerTrade: 20 }, 100_000);
+    const r = calculateCopyAmount(
+      { ...base, sizingMode: 'PERCENTAGE', percentage: 1, maxPerTrade: 20 },
+      100_000,
+    );
     expect(r.amount).toBe(20);
     expect(r.clampedBy).toBe('MAX');
   });
@@ -112,9 +115,9 @@ describe('Other safety limits', () => {
   });
 
   it('rejects excessive slippage and marks unknown price as unknown', () => {
-    expect(failedChecks(evaluateCopyLimits(limitCtx({ currentPrice: 0.7 }))).map((c) => c.code)).toContain(
-      'MAX_SLIPPAGE',
-    );
+    expect(
+      failedChecks(evaluateCopyLimits(limitCtx({ currentPrice: 0.7 }))).map((c) => c.code),
+    ).toContain('MAX_SLIPPAGE');
     const unknown = evaluateCopyLimits(limitCtx({ currentPrice: null }));
     expect(unknown.find((c) => c.code === 'MAX_SLIPPAGE')?.state).toBe('unknown');
     expect(canExecute(unknown)).toBe(true);
@@ -161,11 +164,13 @@ describe('Copy confirmation', () => {
 
   it('automatic mode passes only when confirmation was explicitly disabled', () => {
     const auto = { ...base, mode: 'AUTOMATIC' as const, confirmationRequired: false };
-    expect(canExecute(evaluateCopyLimits(limitCtx({ userConfirmed: false, settings: auto })))).toBe(true);
-    const autoWithConfirm = { ...auto, confirmationRequired: true };
-    expect(canExecute(evaluateCopyLimits(limitCtx({ userConfirmed: false, settings: autoWithConfirm })))).toBe(
-      false,
+    expect(canExecute(evaluateCopyLimits(limitCtx({ userConfirmed: false, settings: auto })))).toBe(
+      true,
     );
+    const autoWithConfirm = { ...auto, confirmationRequired: true };
+    expect(
+      canExecute(evaluateCopyLimits(limitCtx({ userConfirmed: false, settings: autoWithConfirm }))),
+    ).toBe(false);
   });
 });
 

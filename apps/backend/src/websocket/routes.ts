@@ -28,17 +28,27 @@ export async function websocketRoutes(app: FastifyInstance, ctx: AppContext) {
         if (msg.type !== 'auth') return socket.close(4401, 'Authenticate first');
         const id = await ctx.users.authenticate(msg.token).catch(() => null);
         if (!id) {
-          ctx.hub.send(socket, 'connection.status', { status: 'error', message: 'Invalid session token', serverTime: Date.now() });
+          ctx.hub.send(socket, 'connection.status', {
+            status: 'error',
+            message: 'Invalid session token',
+            serverTime: Date.now(),
+          });
           return socket.close(4401, 'Invalid token');
         }
         userId = id;
         clearTimeout(authTimer);
         ctx.hub.add(id, socket);
-        ctx.hub.send(socket, 'connection.status', { status: 'authenticated', serverTime: Date.now() });
+        ctx.hub.send(socket, 'connection.status', {
+          status: 'authenticated',
+          serverTime: Date.now(),
+        });
         return;
       }
       if (msg.type === 'ping' || msg.type === 'resync') {
-        ctx.hub.send(socket, 'connection.status', { status: 'authenticated', serverTime: Date.now() });
+        ctx.hub.send(socket, 'connection.status', {
+          status: 'authenticated',
+          serverTime: Date.now(),
+        });
       }
     });
 

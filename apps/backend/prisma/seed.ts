@@ -28,7 +28,11 @@ async function main() {
       tokenIds: m.tokenIds,
       outcomePrices: [],
     };
-    await db.market.upsert({ where: { conditionId: m.conditionId }, create: { conditionId: m.conditionId, ...data }, update: data });
+    await db.market.upsert({
+      where: { conditionId: m.conditionId },
+      create: { conditionId: m.conditionId, ...data },
+      update: data,
+    });
   }
 
   const traders = [];
@@ -52,7 +56,9 @@ async function main() {
   console.info(`Seeded ${world.markets.length} demo markets and ${traders.length} demo traders.`);
   console.info(`Demo user ${userId} follows 3 traders.`);
   console.info(`Demo session token (paste in extension Settings → Session token): ${apiToken}`);
-  console.info('Demo trader addresses are stable; their generated history is anchored to the backend start time.');
+  console.info(
+    'Demo trader addresses are stable; their generated history is anchored to the backend start time.',
+  );
   await db.$disconnect();
 }
 

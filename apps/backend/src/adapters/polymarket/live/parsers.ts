@@ -26,9 +26,17 @@ const decimal = z.union([z.string(), z.number()]).transform((v, ctx) => {
   }
   return n;
 });
-const optDecimal = z.union([z.string(), z.number()]).nullish().transform((v) => (v === null || v === undefined ? null : toNumber(v)));
-const optString = z.string().nullish().transform((v) => (v === undefined || v === null || v === '' ? null : v));
-const epochSeconds = z.union([z.number(), z.string().regex(/^\d+$/)]).transform((v) => Number(v) * 1000);
+const optDecimal = z
+  .union([z.string(), z.number()])
+  .nullish()
+  .transform((v) => (v === null || v === undefined ? null : toNumber(v)));
+const optString = z
+  .string()
+  .nullish()
+  .transform((v) => (v === undefined || v === null || v === '' ? null : v));
+const epochSeconds = z
+  .union([z.number(), z.string().regex(/^\d+$/)])
+  .transform((v) => Number(v) * 1000);
 
 export interface Page<T> {
   items: T[];
@@ -42,14 +50,18 @@ export function unwrapPage(json: unknown): Page<unknown> {
     const o = json as Record<string, unknown>;
     const data = Array.isArray(o.data) ? o.data : Array.isArray(o.items) ? o.items : [];
     const pagination = (o.pagination ?? {}) as Record<string, unknown>;
-    const cursor = typeof pagination.next_cursor === 'string' && pagination.next_cursor ? pagination.next_cursor : null;
+    const cursor =
+      typeof pagination.next_cursor === 'string' && pagination.next_cursor
+        ? pagination.next_cursor
+        : null;
     return { items: data, nextCursor: pagination.has_more === false ? null : cursor };
   }
   return { items: [], nextCursor: null };
 }
 
 export function unwrapData(json: unknown): unknown {
-  if (json && typeof json === 'object' && 'data' in (json as object)) return (json as { data: unknown }).data;
+  if (json && typeof json === 'object' && 'data' in (json as object))
+    return (json as { data: unknown }).data;
   return json;
 }
 
@@ -74,7 +86,10 @@ const rawTrade = z.object({
 
 export type RawTrade = z.infer<typeof rawTrade>;
 
-export function parseTrades(rows: readonly unknown[]): { fills: TradeFill[]; profiles: Map<string, { userName: string | null; profileImage: string | null }> } {
+export function parseTrades(rows: readonly unknown[]): {
+  fills: TradeFill[];
+  profiles: Map<string, { userName: string | null; profileImage: string | null }>;
+} {
   const fills: TradeFill[] = [];
   const profiles = new Map<string, { userName: string | null; profileImage: string | null }>();
   for (const row of rows) {
@@ -132,7 +147,10 @@ const rawPosition = z.object({
   last_event_at: epochSeconds.nullish(),
 });
 
-export function parsePositions(rows: readonly unknown[], firstBuyAt: ReadonlyMap<string, number>): TraderPosition[] {
+export function parsePositions(
+  rows: readonly unknown[],
+  firstBuyAt: ReadonlyMap<string, number>,
+): TraderPosition[] {
   const out: TraderPosition[] = [];
   for (const row of rows) {
     const r = rawPosition.safeParse(row);
@@ -281,12 +299,19 @@ export function parseMarkets(json: unknown, webUrl: string): MarketInfo[] {
   for (const row of rows) {
     if (!row || typeof row !== 'object') continue;
     const m = row as Record<string, unknown>;
-    const conditionId = typeof m.conditionId === 'string' ? m.conditionId : typeof m.condition_id === 'string' ? m.condition_id : null;
+    const conditionId =
+      typeof m.conditionId === 'string'
+        ? m.conditionId
+        : typeof m.condition_id === 'string'
+          ? m.condition_id
+          : null;
     const question = typeof m.question === 'string' ? m.question : null;
     if (!conditionId || !question) continue;
     const events = jsonArray(m.events);
     const eventSlug =
-      events[0] && typeof (events[0] as { slug?: unknown }).slug === 'string' ? (events[0] as { slug: string }).slug : null;
+      events[0] && typeof (events[0] as { slug?: unknown }).slug === 'string'
+        ? (events[0] as { slug: string }).slug
+        : null;
     const slug = typeof m.slug === 'string' ? m.slug : null;
     out.push({
       conditionId,

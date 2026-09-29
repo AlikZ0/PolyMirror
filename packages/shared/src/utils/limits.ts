@@ -59,7 +59,11 @@ export function evaluateCopyLimits(ctx: LimitContext): LimitCheck[] {
 
   const priceOk = ctx.whalePrice > 0 && ctx.whalePrice < 1;
   checks.push(
-    check('INVALID_PRICE', priceOk ? 'pass' : 'fail', priceOk ? 'Price is valid' : 'Price out of range (0, 1)'),
+    check(
+      'INVALID_PRICE',
+      priceOk ? 'pass' : 'fail',
+      priceOk ? 'Price is valid' : 'Price out of range (0, 1)',
+    ),
   );
 
   checks.push(
@@ -75,7 +79,11 @@ export function evaluateCopyLimits(ctx: LimitContext): LimitCheck[] {
   checks.push(
     ctx.amount <= maxPerTrade
       ? check('MAX_COPY_AMOUNT', 'pass', `Amount ≤ ${formatUsd(maxPerTrade)} per trade`)
-      : check('MAX_COPY_AMOUNT', 'fail', `Amount exceeds the per-trade maximum ${formatUsd(maxPerTrade)}`),
+      : check(
+          'MAX_COPY_AMOUNT',
+          'fail',
+          `Amount exceeds the per-trade maximum ${formatUsd(maxPerTrade)}`,
+        ),
   );
 
   checks.push(
@@ -87,7 +95,11 @@ export function evaluateCopyLimits(ctx: LimitContext): LimitCheck[] {
   const dailyAfter = ctx.dailyUsed + ctx.amount;
   checks.push(
     dailyAfter <= maxDaily + 1e-9
-      ? check('MAX_DAILY_COPY_VOLUME', 'pass', `Daily volume ${formatUsd(dailyAfter)} / ${formatUsd(maxDaily)}`)
+      ? check(
+          'MAX_DAILY_COPY_VOLUME',
+          'pass',
+          `Daily volume ${formatUsd(dailyAfter)} / ${formatUsd(maxDaily)}`,
+        )
       : check(
           'MAX_DAILY_COPY_VOLUME',
           'fail',
@@ -97,17 +109,28 @@ export function evaluateCopyLimits(ctx: LimitContext): LimitCheck[] {
 
   checks.push(
     ctx.openPositions < maxOpen
-      ? check('MAX_OPEN_POSITIONS', 'pass', `Open copied positions ${ctx.openPositions} / ${maxOpen}`)
+      ? check(
+          'MAX_OPEN_POSITIONS',
+          'pass',
+          `Open copied positions ${ctx.openPositions} / ${maxOpen}`,
+        )
       : check('MAX_OPEN_POSITIONS', 'fail', `Maximum open copied positions reached (${maxOpen})`),
   );
 
   if (ctx.currentPrice === null) {
-    checks.push(check('MAX_SLIPPAGE', 'unknown', 'Current price unavailable — slippage cannot be verified'));
+    checks.push(
+      check('MAX_SLIPPAGE', 'unknown', 'Current price unavailable — slippage cannot be verified'),
+    );
   } else {
-    const slippage = ctx.whalePrice > 0 ? (ctx.currentPrice - ctx.whalePrice) / ctx.whalePrice : Infinity;
+    const slippage =
+      ctx.whalePrice > 0 ? (ctx.currentPrice - ctx.whalePrice) / ctx.whalePrice : Infinity;
     checks.push(
       slippage <= s.maxSlippage + 1e-9
-        ? check('MAX_SLIPPAGE', 'pass', `Price moved ${formatPct(slippage, { signed: true })} (max ${formatPct(s.maxSlippage)})`)
+        ? check(
+            'MAX_SLIPPAGE',
+            'pass',
+            `Price moved ${formatPct(slippage, { signed: true })} (max ${formatPct(s.maxSlippage)})`,
+          )
         : check(
             'MAX_SLIPPAGE',
             'fail',
@@ -117,7 +140,13 @@ export function evaluateCopyLimits(ctx: LimitContext): LimitCheck[] {
   }
 
   if (ctx.balance === null) {
-    checks.push(check('MIN_BALANCE', 'unknown', 'Balance cannot be read in this mode — check it on Polymarket'));
+    checks.push(
+      check(
+        'MIN_BALANCE',
+        'unknown',
+        'Balance cannot be read in this mode — check it on Polymarket',
+      ),
+    );
   } else {
     const after = ctx.balance - ctx.amount;
     checks.push(
@@ -136,13 +165,20 @@ export function evaluateCopyLimits(ctx: LimitContext): LimitCheck[] {
     checks.push(
       allowed
         ? check('CATEGORY_NOT_ALLOWED', 'pass', `Category ${ctx.category} allowed`)
-        : check('CATEGORY_NOT_ALLOWED', 'fail', `Category ${ctx.category ?? 'unknown'} is not in your allowed list`),
+        : check(
+            'CATEGORY_NOT_ALLOWED',
+            'fail',
+            `Category ${ctx.category ?? 'unknown'} is not in your allowed list`,
+          ),
     );
   }
 
   const excluded = s.excludedMarkets.some((m) => {
     const v = m.toLowerCase();
-    return v === ctx.conditionId.toLowerCase() || (ctx.marketSlug !== null && v === ctx.marketSlug.toLowerCase());
+    return (
+      v === ctx.conditionId.toLowerCase() ||
+      (ctx.marketSlug !== null && v === ctx.marketSlug.toLowerCase())
+    );
   });
   checks.push(
     excluded
@@ -154,7 +190,11 @@ export function evaluateCopyLimits(ctx: LimitContext): LimitCheck[] {
   checks.push(
     age <= ctx.maxTradeAgeMs
       ? check('TRADE_TOO_OLD', 'pass', 'Trade is fresh')
-      : check('TRADE_TOO_OLD', 'fail', `Trade is ${Math.round(age / 1000)}s old — too stale to copy`),
+      : check(
+          'TRADE_TOO_OLD',
+          'fail',
+          `Trade is ${Math.round(age / 1000)}s old — too stale to copy`,
+        ),
   );
 
   checks.push(
@@ -168,7 +208,11 @@ export function evaluateCopyLimits(ctx: LimitContext): LimitCheck[] {
   const autoAllowed = s.mode === 'AUTOMATIC' && !s.confirmationRequired;
   checks.push(
     ctx.userConfirmed || autoAllowed
-      ? check('CONFIRMATION_REQUIRED', 'pass', ctx.userConfirmed ? 'Confirmed by you' : 'Automatic mode enabled')
+      ? check(
+          'CONFIRMATION_REQUIRED',
+          'pass',
+          ctx.userConfirmed ? 'Confirmed by you' : 'Automatic mode enabled',
+        )
       : check('CONFIRMATION_REQUIRED', 'fail', 'Your confirmation is required'),
   );
 

@@ -177,7 +177,10 @@ export class DemoWorld {
       if (!m) continue;
       const idx = m.tokenIds.indexOf(f.tokenId);
       if (m.resolvesAt !== null && m.resolvesAt <= now) {
-        resolutions.set(f.tokenId, { price: idx === m.winningIndex ? 1 : 0, resolvedAt: m.resolvesAt });
+        resolutions.set(f.tokenId, {
+          price: idx === m.winningIndex ? 1 : 0,
+          resolvedAt: m.resolvesAt,
+        });
       } else {
         marks.set(f.tokenId, this.priceAt(m, idx, now));
       }
@@ -200,7 +203,9 @@ export class DemoWorld {
         const slug = `demo-${category.toLowerCase().replace(/\s+/g, '-')}-${i}`;
         // ~45% of markets resolve inside the demo window (past or near future).
         const resolves = rng.chance(0.45);
-        const resolvesAt = resolves ? Math.floor(start + rng.range(20, DEMO_EPOCH_DAYS + 10) * DAY_MS) : null;
+        const resolvesAt = resolves
+          ? Math.floor(start + rng.range(20, DEMO_EPOCH_DAYS + 10) * DAY_MS)
+          : null;
         const market: DemoMarket = {
           conditionId,
           question,
@@ -221,14 +226,27 @@ export class DemoWorld {
         };
         this.markets.push(market);
         this.marketById.set(conditionId, market);
-        market.tokenIds.forEach((tokenId, index) => this.marketByToken.set(tokenId, { market, index }));
+        market.tokenIds.forEach((tokenId, index) =>
+          this.marketByToken.set(tokenId, { market, index }),
+        );
       }
     }
   }
 
   private generateTraders() {
     const rng = new Rng(`${this.seed}|traders`);
-    const adjectives = ['Silent', 'Iron', 'Lucky', 'Deep', 'Swift', 'Calm', 'Bold', 'Grey', 'Arctic', 'Quant'];
+    const adjectives = [
+      'Silent',
+      'Iron',
+      'Lucky',
+      'Deep',
+      'Swift',
+      'Calm',
+      'Bold',
+      'Grey',
+      'Arctic',
+      'Quant',
+    ];
     const nouns = ['Whale', 'Orca', 'Shark', 'Kraken', 'Marlin', 'Narwhal', 'Dolphin', 'Manta'];
     for (let i = 0; i < 40; i++) {
       const tier = i < 8 ? 'mega' : i < 24 ? 'large' : 'mid';
@@ -236,7 +254,12 @@ export class DemoWorld {
       this.traders.push({
         address: `0x${rng.hex(20)}`,
         userName: `${rng.pick(adjectives)}${rng.pick(nouns)}${rng.int(1, 99)}`,
-        medianSize: tier === 'mega' ? rng.range(40_000, 150_000) : tier === 'large' ? rng.range(8_000, 40_000) : rng.range(1_000, 8_000),
+        medianSize:
+          tier === 'mega'
+            ? rng.range(40_000, 150_000)
+            : tier === 'large'
+              ? rng.range(8_000, 40_000)
+              : rng.range(1_000, 8_000),
         skill: rng.range(0.35, 0.68),
         liveRate: rng.range(0.1, 0.35),
         favoriteCategories: [...new Set(favs)],
@@ -245,7 +268,9 @@ export class DemoWorld {
   }
 
   private pickMarketFor(trader: DemoTrader, markets: readonly DemoMarket[], rng: Rng): DemoMarket {
-    const preferred = markets.filter((m) => m.category !== null && trader.favoriteCategories.includes(m.category));
+    const preferred = markets.filter(
+      (m) => m.category !== null && trader.favoriteCategories.includes(m.category),
+    );
     return rng.pick(preferred.length > 0 && rng.chance(0.7) ? preferred : markets);
   }
 
@@ -262,7 +287,15 @@ export class DemoWorld {
     const roundedSize = Math.round(size * 100) / 100;
     const txHash = `0x${new Rng(`${trader.address}|${tokenId}|${timestamp}|${side}`).hex(32)}`;
     return {
-      id: fillId({ transactionHash: txHash, traderAddress: trader.address, tokenId, side, size: roundedSize, price, timestamp }),
+      id: fillId({
+        transactionHash: txHash,
+        traderAddress: trader.address,
+        tokenId,
+        side,
+        size: roundedSize,
+        price,
+        timestamp,
+      }),
       traderAddress: trader.address,
       conditionId: market.conditionId,
       tokenId,
@@ -288,10 +321,14 @@ export class DemoWorld {
       const fills: TradeFill[] = [];
       const positionCount = rng.int(12, 90);
       // Some traders go quiet: their activity ends early (to exercise "inactive" filters).
-      const activeUntil = rng.chance(0.2) ? this.startedAt - rng.range(10, 40) * DAY_MS : this.startedAt - 60_000;
+      const activeUntil = rng.chance(0.2)
+        ? this.startedAt - rng.range(10, 40) * DAY_MS
+        : this.startedAt - 60_000;
       for (let p = 0; p < positionCount; p++) {
         const openAt = windowStart + rng.float() * (activeUntil - windowStart);
-        const candidates = this.markets.filter((m) => m.resolvesAt === null || m.resolvesAt > openAt + DAY_MS);
+        const candidates = this.markets.filter(
+          (m) => m.resolvesAt === null || m.resolvesAt > openAt + DAY_MS,
+        );
         if (candidates.length === 0) continue;
         const market = this.pickMarketFor(trader, candidates, rng);
         // Skilled traders more often pick the side that eventually wins.
@@ -311,10 +348,15 @@ export class DemoWorld {
         // Exit before resolution in ~60% of cases.
         if (rng.chance(0.6)) {
           const exitAt = t + rng.range(0.2, 12) * DAY_MS;
-          const limit = Math.min(this.startedAt - 60_000, market.resolvesAt ?? Number.POSITIVE_INFINITY);
+          const limit = Math.min(
+            this.startedAt - 60_000,
+            market.resolvesAt ?? Number.POSITIVE_INFINITY,
+          );
           if (exitAt < limit) {
             const price = this.priceAt(market, index, exitAt);
-            fills.push(this.makeFill(trader, market, index, 'SELL', shares, price, Math.floor(exitAt)));
+            fills.push(
+              this.makeFill(trader, market, index, 'SELL', shares, price, Math.floor(exitAt)),
+            );
           }
         }
       }

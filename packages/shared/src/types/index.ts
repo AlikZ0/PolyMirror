@@ -327,13 +327,7 @@ export interface CopySettings {
 }
 
 export type CopyOrderStatus =
-  | 'PENDING'
-  | 'EXECUTING'
-  | 'SUBMITTED'
-  | 'CONFIRMED'
-  | 'SKIPPED'
-  | 'FAILED'
-  | 'CANCELLED';
+  'PENDING' | 'EXECUTING' | 'SUBMITTED' | 'CONFIRMED' | 'SKIPPED' | 'FAILED' | 'CANCELLED';
 
 /** User-facing status labels. */
 export type CopyDisplayStatus = 'Pending' | 'Copied' | 'Skipped' | 'Failed' | 'Cancelled';

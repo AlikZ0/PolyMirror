@@ -1,4 +1,4 @@
-import type { RateLimiter} from '../../../lib/async';
+import type { RateLimiter } from '../../../lib/async';
 import { sleep } from '../../../lib/async';
 import { UpstreamError, UpstreamTimeoutError } from '../../../lib/errors';
 
@@ -13,7 +13,8 @@ export interface HttpClientOptions {
   userAgent?: string;
 }
 
-export type QueryValue = string | number | boolean | undefined | null | readonly (string | number)[];
+export type QueryValue =
+  string | number | boolean | undefined | null | readonly (string | number)[];
 
 /**
  * JSON-over-HTTPS client for Polymarket's public read APIs.
@@ -29,7 +30,10 @@ export class HttpClient {
   }
 
   buildUrl(path: string, query: Record<string, QueryValue> = {}): string {
-    const url = new URL(path.replace(/^\//, ''), this.opts.baseUrl.endsWith('/') ? this.opts.baseUrl : `${this.opts.baseUrl}/`);
+    const url = new URL(
+      path.replace(/^\//, ''),
+      this.opts.baseUrl.endsWith('/') ? this.opts.baseUrl : `${this.opts.baseUrl}/`,
+    );
     for (const [k, v] of Object.entries(query)) {
       if (v === undefined || v === null) continue;
       if (Array.isArray(v)) {
@@ -53,7 +57,10 @@ export class HttpClient {
       try {
         res = await this.fetchImpl(url, {
           method: 'GET',
-          headers: { accept: 'application/json', 'user-agent': this.opts.userAgent ?? 'PolyMirror/0.1' },
+          headers: {
+            accept: 'application/json',
+            'user-agent': this.opts.userAgent ?? 'PolyMirror/0.1',
+          },
           signal: controller.signal,
         });
       } catch (err) {
@@ -75,7 +82,11 @@ export class HttpClient {
       }
       if ((res.status === 429 || res.status >= 500) && attempt++ < maxRetries) {
         const retryAfter = Number(res.headers.get('retry-after'));
-        await sleep(Number.isFinite(retryAfter) && retryAfter > 0 ? Math.min(retryAfter * 1000, 30_000) : backoff(attempt));
+        await sleep(
+          Number.isFinite(retryAfter) && retryAfter > 0
+            ? Math.min(retryAfter * 1000, 30_000)
+            : backoff(attempt),
+        );
         continue;
       }
       if (res.status === 404) return null as T;

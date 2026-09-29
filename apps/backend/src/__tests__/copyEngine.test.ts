@@ -14,7 +14,12 @@ class FakeExecution implements ExecutionAdapter {
   supportsProgrammaticExecution = true;
   balance: number | null = 1_000;
   submitResult: SubmitResult | Error = { status: 'accepted', externalOrderId: 'ext-1' };
-  verifyResult: VerifyResult = { status: 'confirmed', fillPrice: 0.62, filledShares: 16.1, transactionHash: '0xtx' };
+  verifyResult: VerifyResult = {
+    status: 'confirmed',
+    fillPrice: 0.62,
+    filledShares: 16.1,
+    transactionHash: '0xtx',
+  };
   submitted: CopyOrder[] = [];
   async getBalance() {
     return this.balance;
@@ -93,7 +98,14 @@ function setup() {
   events = new FakeEvents();
   market.price = 0.61;
   market.active = true;
-  engine = new CopyEngine(store, exec, market, events, { maxTradeAgeMs: 180_000, assistedVerifyTimeoutMs: 1_800_000 }, () => now);
+  engine = new CopyEngine(
+    store,
+    exec,
+    market,
+    events,
+    { maxTradeAgeMs: 180_000, assistedVerifyTimeoutMs: 1_800_000 },
+    () => now,
+  );
 }
 
 async function proposeTrade(p: Partial<StoredTrade> = {}) {
@@ -169,7 +181,9 @@ describe('copy confirmation', () => {
     expect(result.transactionHash).toBe('0xtx');
     expect(result.externalOrderId).toBe('ext-1');
     expect(events.names()).toEqual(expect.arrayContaining(['copy.executing', 'copy.success']));
-    expect(store.audits.map((a) => a.action)).toEqual(expect.arrayContaining(['copy.confirm', 'copy.confirmed']));
+    expect(store.audits.map((a) => a.action)).toEqual(
+      expect.arrayContaining(['copy.confirm', 'copy.confirmed']),
+    );
   });
 
   it('does not mark an accepted-but-unverified order as copied', async () => {
@@ -197,7 +211,10 @@ describe('copy confirmation', () => {
 
   it('serializes concurrent confirmations of the same order', async () => {
     const order = await proposeTrade();
-    const results = await Promise.allSettled([confirm(order.id, 10, 'k1-aaaaaaa'), confirm(order.id, 10, 'k2-bbbbbbb')]);
+    const results = await Promise.allSettled([
+      confirm(order.id, 10, 'k1-aaaaaaa'),
+      confirm(order.id, 10, 'k2-bbbbbbb'),
+    ]);
     expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
     expect(exec.submitted).toHaveLength(1);
   });
@@ -212,7 +229,8 @@ describe('copy confirmation', () => {
     const order = await proposeTrade();
     market.price = 0.75; // price ran away: slippage > 3%
     await expect(confirm(order.id)).rejects.toSatisfy(
-      (e: unknown) => e instanceof AppError && e.code === 'LIMIT_VIOLATION' && Array.isArray(e.details),
+      (e: unknown) =>
+        e instanceof AppError && e.code === 'LIMIT_VIOLATION' && Array.isArray(e.details),
     );
     expect(exec.submitted).toHaveLength(0);
     expect((await store.getOrder(order.id))!.status).toBe('PENDING');
@@ -253,8 +271,16 @@ describe('copy confirmation', () => {
 
   it('only the owner can confirm or skip', async () => {
     const order = await proposeTrade();
-    await expect(engine.confirm('someone-else', { copyOrderId: order.id, expectedAmount: 10, idempotencyKey: 'x-12345678' })).rejects.toMatchObject({ code: 'NOT_FOUND' });
-    await expect(engine.skip('someone-else', order.id)).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect(
+      engine.confirm('someone-else', {
+        copyOrderId: order.id,
+        expectedAmount: 10,
+        idempotencyKey: 'x-12345678',
+      }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect(engine.skip('someone-else', order.id)).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+    });
   });
 
   it('skips a pending order', async () => {
@@ -342,7 +368,13 @@ describe('assisted execution and maintenance', () => {
     const order = await proposeTrade();
     const submitted = await confirm(order.id);
     expect(submitted.status).toBe('SUBMITTED');
-    exec.verifyResult = { status: 'confirmed', fillPrice: 0.6, filledShares: 16, filledAmount: 9.6, transactionHash: '0xuser' };
+    exec.verifyResult = {
+      status: 'confirmed',
+      fillPrice: 0.6,
+      filledShares: 16,
+      filledAmount: 9.6,
+      transactionHash: '0xuser',
+    };
     const verified = await engine.verify(USER, order.id);
     expect(verified.status).toBe('CONFIRMED');
     expect(verified.amount).toBe(9.6);

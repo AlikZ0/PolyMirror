@@ -40,9 +40,12 @@ describe('P/L calculation', () => {
   });
 
   it('settles remaining shares at the resolution price', () => {
-    const { positions } = reconstructPositions([fill({ side: 'BUY', size: 100, price: 0.3, timestamp: 1 })], {
-      resolutions: new Map([['t1', { price: 0, resolvedAt: 10 }]]),
-    });
+    const { positions } = reconstructPositions(
+      [fill({ side: 'BUY', size: 100, price: 0.3, timestamp: 1 })],
+      {
+        resolutions: new Map([['t1', { price: 0, resolvedAt: 10 }]]),
+      },
+    );
     expect(positions[0]!.status).toBe('RESOLVED');
     expect(positions[0]!.pnl).toBeCloseTo(-30);
     expect(positions[0]!.closedAt).toBe(10);
@@ -124,7 +127,14 @@ describe('Trader analytics', () => {
   it('computes activity, concentration and simultaneous positions', () => {
     const fills = [
       fill({ side: 'BUY', size: 100, price: 0.5, timestamp: now - 2 * DAY }),
-      fill({ side: 'BUY', size: 100, price: 0.5, timestamp: now - DAY, conditionId: 'c2', tokenId: 't2' }),
+      fill({
+        side: 'BUY',
+        size: 100,
+        price: 0.5,
+        timestamp: now - DAY,
+        conditionId: 'c2',
+        tokenId: 't2',
+      }),
       fill({ side: 'SELL', size: 100, price: 0.8, timestamp: now - DAY / 2 }),
     ];
     const { positions } = reconstructPositions(fills);

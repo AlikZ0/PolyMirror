@@ -15,7 +15,9 @@ export async function createApp(config: AppConfig, opts: { startJobs?: boolean }
   if (opts.startJobs ?? true) {
     ctx.watcher.start();
     maintenance = setInterval(() => {
-      ctx.copyEngine.runMaintenance().catch((err: Error) => app.log.warn({ err: err.message }, 'maintenance failed'));
+      ctx.copyEngine
+        .runMaintenance()
+        .catch((err: Error) => app.log.warn({ err: err.message }, 'maintenance failed'));
     }, config.maintenanceIntervalMs);
     maintenance.unref();
   }

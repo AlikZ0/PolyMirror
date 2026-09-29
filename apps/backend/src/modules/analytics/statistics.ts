@@ -21,7 +21,11 @@ export class StatisticsService {
   async forUser(userId: string, traderAddress?: string): Promise<UserStatistics> {
     const traderFilter = traderAddress ? { trader: { address: traderAddress.toLowerCase() } } : {};
     const [grouped, confirmed] = await Promise.all([
-      this.db.copyOrder.groupBy({ by: ['status'], where: { userId, ...traderFilter }, _count: { _all: true } }),
+      this.db.copyOrder.groupBy({
+        by: ['status'],
+        where: { userId, ...traderFilter },
+        _count: { _all: true },
+      }),
       this.db.copyOrder.findMany({
         where: { userId, status: 'CONFIRMED', ...traderFilter },
         select: { amount: true, pnl: true, executedAt: true, closedAt: true },
@@ -63,18 +67,26 @@ export class StatisticsService {
       worstTrade: minOf(pnls),
       maxDrawdown: days.length ? dd.maxDrawdown : null,
       todayVolume: sum(
-        confirmed.filter((c) => c.executedAt && c.executedAt.getTime() >= today).map((c) => decReq(c.amount)),
+        confirmed
+          .filter((c) => c.executedAt && c.executedAt.getTime() >= today)
+          .map((c) => decReq(c.amount)),
       ),
       cumulativePnl: days.map(([t], i) => ({ t, value: dd.equity[i]! })),
     };
   }
 
-  async dashboard(userId: string, mode: DataMode, notifications: NotificationService): Promise<DashboardSummary> {
+  async dashboard(
+    userId: string,
+    mode: DataMode,
+    notifications: NotificationService,
+  ): Promise<DashboardSummary> {
     const [tracked, newTrades, stats, pending, events] = await Promise.all([
       this.db.watchlist.count({ where: { userId, status: 'ACTIVE' } }),
       this.db.watchlist.aggregate({ where: { userId }, _sum: { newTrades: true } }),
       this.forUser(userId),
-      this.db.copyOrder.count({ where: { userId, status: 'PENDING', expiresAt: { gt: new Date() } } }),
+      this.db.copyOrder.count({
+        where: { userId, status: 'PENDING', expiresAt: { gt: new Date() } },
+      }),
       notifications.list(userId, 15),
     ]);
     return {

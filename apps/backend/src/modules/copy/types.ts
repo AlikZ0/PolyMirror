@@ -22,7 +22,17 @@ export interface CopyOrderRecord extends CopyOrder {
 
 export type NewCopyOrder = Omit<
   CopyOrderRecord,
-  'id' | 'createdAt' | 'executedAt' | 'externalOrderId' | 'transactionHash' | 'fillPrice' | 'filledShares' | 'currentPrice' | 'pnl' | 'closedAt' | 'confirmIdempotencyKey'
+  | 'id'
+  | 'createdAt'
+  | 'executedAt'
+  | 'externalOrderId'
+  | 'transactionHash'
+  | 'fillPrice'
+  | 'filledShares'
+  | 'currentPrice'
+  | 'pnl'
+  | 'closedAt'
+  | 'confirmIdempotencyKey'
 > & { idempotencyKey: string };
 
 export interface ExposureSnapshot {
@@ -46,7 +56,11 @@ export interface CopyStore {
    * Atomic compare-and-set: applies `patch` only if the current status is one of `from`.
    * Returns null when the transition lost a race or is not allowed.
    */
-  transition(id: string, from: readonly CopyOrderStatus[], patch: Partial<CopyOrderRecord>): Promise<CopyOrderRecord | null>;
+  transition(
+    id: string,
+    from: readonly CopyOrderStatus[],
+    patch: Partial<CopyOrderRecord>,
+  ): Promise<CopyOrderRecord | null>;
   update(id: string, patch: Partial<CopyOrderRecord>): Promise<CopyOrderRecord>;
   exposure(userId: string, dayStart: number, excludeOrderId?: string): Promise<ExposureSnapshot>;
   /** Serializes limit checks + state transitions of one user (daily limit / open positions races). */
@@ -54,20 +68,38 @@ export interface CopyStore {
   listByStatus(statuses: readonly CopyOrderStatus[], limit: number): Promise<CopyOrderRecord[]>;
   listPending(userId: string): Promise<CopyOrderRecord[]>;
   listOpenConfirmed(limit: number): Promise<CopyOrderRecord[]>;
-  audit(userId: string | null, action: string, entityId: string | null, payload?: unknown): Promise<void>;
+  audit(
+    userId: string | null,
+    action: string,
+    entityId: string | null,
+    payload?: unknown,
+  ): Promise<void>;
 }
 
 export interface CopyEventsPort {
   emit<E extends WsEventName>(userId: string, event: E, data: WsPayloads[E]): void;
   notify(
     userId: string,
-    n: { type: NotificationType; title: string; message: string; traderAddress?: string | null; copyOrderId?: string | null },
+    n: {
+      type: NotificationType;
+      title: string;
+      message: string;
+      traderAddress?: string | null;
+      copyOrderId?: string | null;
+    },
   ): Promise<void>;
 }
 
 export interface MarketPort {
   getCurrentPrice(tokenId: string): Promise<number | null>;
-  getMarketState(conditionId: string): Promise<{ active: boolean | null; resolvedPrice?: (tokenId: string) => number | null; url: string | null; category: string | null }>;
+  getMarketState(
+    conditionId: string,
+  ): Promise<{
+    active: boolean | null;
+    resolvedPrice?: (tokenId: string) => number | null;
+    url: string | null;
+    category: string | null;
+  }>;
 }
 
 /** Strips server-internal fields before an order leaves the backend. */

@@ -42,13 +42,21 @@ export class LivePolymarketAdapter implements PolymarketAdapter {
   private readonly maxPages: number;
   private readonly marketCache = new TtlCache<MarketInfo | null>(10 * 60_000, 5_000);
   private readonly priceCache = new TtlCache<number | null>(5_000, 5_000);
-  private readonly profileCache = new TtlCache<{ userName: string | null; profileImage: string | null }>(60 * 60_000, 5_000);
+  private readonly profileCache = new TtlCache<{
+    userName: string | null;
+    profileImage: string | null;
+  }>(60 * 60_000, 5_000);
 
   constructor(private readonly opts: LiveAdapterOptions) {
     const limiter = new RateLimiter(opts.maxRps);
     this.data = new HttpClient({ baseUrl: opts.dataUrl, limiter, fetchImpl: opts.fetchImpl });
     this.gamma = new HttpClient({ baseUrl: opts.gammaUrl, limiter, fetchImpl: opts.fetchImpl });
-    this.clob = new HttpClient({ baseUrl: opts.clobUrl, limiter, fetchImpl: opts.fetchImpl, timeoutMs: 5_000 });
+    this.clob = new HttpClient({
+      baseUrl: opts.clobUrl,
+      limiter,
+      fetchImpl: opts.fetchImpl,
+      timeoutMs: 5_000,
+    });
     this.maxPages = opts.maxPages ?? 10;
   }
 
@@ -70,7 +78,8 @@ export class LivePolymarketAdapter implements PolymarketAdapter {
       });
       const { items, nextCursor } = unwrapPage(json);
       const rows = parseLeaderboard(items);
-      for (const r of rows) this.profileCache.set(r.address, { userName: r.userName, profileImage: r.profileImage });
+      for (const r of rows)
+        this.profileCache.set(r.address, { userName: r.userName, profileImage: r.profileImage });
       out.push(...rows);
       if (!nextCursor) break;
       cursor = nextCursor;
@@ -103,7 +112,10 @@ export class LivePolymarketAdapter implements PolymarketAdapter {
     return fills.sort((a, b) => b.timestamp - a.timestamp);
   }
 
-  async getTraderPositions(address: string, fillsHint: readonly TradeFill[] = []): Promise<TraderPosition[]> {
+  async getTraderPositions(
+    address: string,
+    fillsHint: readonly TradeFill[] = [],
+  ): Promise<TraderPosition[]> {
     const firstBuyAt = new Map<string, number>();
     for (const f of fillsHint) {
       if (f.side !== 'BUY') continue;
@@ -133,7 +145,8 @@ export class LivePolymarketAdapter implements PolymarketAdapter {
     if (missing.length) {
       const markets = await this.getMarkets(missing);
       const byId = new Map(markets.map((m) => [m.conditionId, m.category]));
-      for (const p of positions) if (p.category === null) p.category = byId.get(p.conditionId) ?? null;
+      for (const p of positions)
+        if (p.category === null) p.category = byId.get(p.conditionId) ?? null;
     }
     return positions;
   }

@@ -1,4 +1,9 @@
-import type { CopySettings as DbCopySettings, CopyOrder as DbCopyOrder, Prisma, Trade as DbTrade } from '@prisma/client';
+import type {
+  CopySettings as DbCopySettings,
+  CopyOrder as DbCopyOrder,
+  Prisma,
+  Trade as DbTrade,
+} from '@prisma/client';
 import { DEFAULT_COPY_SETTINGS } from '@polymirror/shared';
 import type { CopySettings } from '@polymirror/shared';
 import type { CopyOrderRecord, StoredTrade } from '../modules/copy/types';
@@ -30,7 +35,10 @@ export function toCopySettings(row: DbCopySettings | null): CopySettings {
   };
 }
 
-export function toCopyOrder(row: DbCopyOrder & { trader?: { address: string } }, traderAddress?: string): CopyOrderRecord {
+export function toCopyOrder(
+  row: DbCopyOrder & { trader?: { address: string } },
+  traderAddress?: string,
+): CopyOrderRecord {
   return {
     id: row.id,
     userId: row.userId,
@@ -66,9 +74,12 @@ export function toCopyOrder(row: DbCopyOrder & { trader?: { address: string } },
 }
 
 /** Converts a partial CopyOrderRecord patch to Prisma update data. */
-export function toCopyOrderUpdate(patch: Partial<CopyOrderRecord>): Prisma.CopyOrderUncheckedUpdateInput {
+export function toCopyOrderUpdate(
+  patch: Partial<CopyOrderRecord>,
+): Prisma.CopyOrderUncheckedUpdateInput {
   const data: Prisma.CopyOrderUncheckedUpdateInput = {};
-  const date = (v: number | null | undefined) => (v === undefined ? undefined : v === null ? null : new Date(v));
+  const date = (v: number | null | undefined) =>
+    v === undefined ? undefined : v === null ? null : new Date(v);
   if (patch.status !== undefined) data.status = patch.status;
   if (patch.failureReason !== undefined) data.failureReason = patch.failureReason;
   if (patch.externalOrderId !== undefined) data.externalOrderId = patch.externalOrderId;
@@ -78,7 +89,8 @@ export function toCopyOrderUpdate(patch: Partial<CopyOrderRecord>): Prisma.CopyO
   if (patch.currentPrice !== undefined) data.currentPrice = patch.currentPrice;
   if (patch.pnl !== undefined) data.pnl = patch.pnl;
   if (patch.amount !== undefined) data.amount = patch.amount;
-  if (patch.confirmIdempotencyKey !== undefined) data.confirmIdempotencyKey = patch.confirmIdempotencyKey;
+  if (patch.confirmIdempotencyKey !== undefined)
+    data.confirmIdempotencyKey = patch.confirmIdempotencyKey;
   if (patch.closedAt !== undefined) data.closedAt = date(patch.closedAt);
   if (patch.executedAt !== undefined) data.executedAt = date(patch.executedAt);
   return data;

@@ -23,15 +23,24 @@ export class DemoPolymarketAdapter implements PolymarketAdapter {
     this.world = new DemoWorld(startedAt);
   }
 
-  async listLeaderboard(params: { window: LeaderboardWindow; sortBy: 'VOLUME' | 'PNL'; limit: number; category?: string }): Promise<LeaderboardEntry[]> {
+  async listLeaderboard(params: {
+    window: LeaderboardWindow;
+    sortBy: 'VOLUME' | 'PNL';
+    limit: number;
+    category?: string;
+  }): Promise<LeaderboardEntry[]> {
     const now = this.now();
     const len = WINDOW_MS[params.window];
     const start = len === null ? 0 : now - len;
     const rows = this.world.traders.map((t) => {
       const fills = this.world
         .allFills(t.address, now)
-        .filter((f) => f.timestamp >= start && (!params.category || f.category === params.category));
-      const positions = this.world.positions(t.address, now).filter((p) => (p.closedAt ?? p.openedAt ?? 0) >= start);
+        .filter(
+          (f) => f.timestamp >= start && (!params.category || f.category === params.category),
+        );
+      const positions = this.world
+        .positions(t.address, now)
+        .filter((p) => (p.closedAt ?? p.openedAt ?? 0) >= start);
       return {
         address: t.address,
         rank: null as number | null,

@@ -1,8 +1,6 @@
 import { z } from 'zod';
 
-const bool = z
-  .enum(['true', 'false', '1', '0'])
-  .transform((v) => v === 'true' || v === '1');
+const bool = z.enum(['true', 'false', '1', '0']).transform((v) => v === 'true' || v === '1');
 
 const envSchema = z.object({
   APP_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -39,7 +37,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
     mode: e.DATA_MODE,
     port: e.PORT,
     host: e.HOST,
-    corsOrigins: e.CORS_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean),
+    corsOrigins: e.CORS_ORIGINS.split(',')
+      .map((s) => s.trim())
+      .filter(Boolean),
     databaseUrl: e.DATABASE_URL,
     polymarket: {
       dataUrl: e.POLYMARKET_API_URL,
@@ -48,7 +48,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
       webUrl: e.POLYMARKET_WEB_URL,
       maxRps: e.POLYMARKET_MAX_RPS,
     },
-    watcherPollIntervalMs: e.DATA_MODE === 'demo' ? Math.min(e.WATCHER_POLL_INTERVAL_MS, 10_000) : e.WATCHER_POLL_INTERVAL_MS,
+    watcherPollIntervalMs:
+      e.DATA_MODE === 'demo'
+        ? Math.min(e.WATCHER_POLL_INTERVAL_MS, 10_000)
+        : e.WATCHER_POLL_INTERVAL_MS,
     maxTradeAgeMs: e.MAX_TRADE_AGE_SECONDS * 1000,
     assistedVerifyTimeoutMs: e.ASSISTED_VERIFY_TIMEOUT_SECONDS * 1000,
     maintenanceIntervalMs: e.MAINTENANCE_INTERVAL_MS,

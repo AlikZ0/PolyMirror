@@ -49,7 +49,12 @@ export function createAdapter(config: AppConfig): PolymarketAdapter {
 }
 
 /** Wires every service. Demo mode always pairs the demo data source with simulated execution. */
-export function createContext(config: AppConfig, db: Db, log: FastifyBaseLogger, adapter = createAdapter(config)): AppContext {
+export function createContext(
+  config: AppConfig,
+  db: Db,
+  log: FastifyBaseLogger,
+  adapter = createAdapter(config),
+): AppContext {
   const hub = new WsHub();
   const markets = new MarketService(db, adapter);
   const execution: ExecutionAdapter =
@@ -61,7 +66,9 @@ export function createContext(config: AppConfig, db: Db, log: FastifyBaseLogger,
   const trades = new TradeService(db, markets);
   const loader = new TraderDataLoader(db, adapter, adapter.mode === 'demo' ? 20_000 : 2 * 60_000);
   const statistics = new StatisticsService(db);
-  const traders = new TraderService(db, adapter, loader, statistics, { enrichLimit: config.scannerEnrichLimit });
+  const traders = new TraderService(db, adapter, loader, statistics, {
+    enrichLimit: config.scannerEnrichLimit,
+  });
   const watchlist = new WatchlistService(db, trades, (address) => {
     void traders.analytics(address, 'all').catch(() => undefined);
   });

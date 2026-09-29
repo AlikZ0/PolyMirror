@@ -19,8 +19,16 @@ export interface WsPayloads {
   'copy.executing': { order: CopyOrder };
   'copy.success': { order: CopyOrder };
   'copy.failed': { order: CopyOrder; reason: string };
-  'trader.status': { traderAddress: string; status: WatchStatus | 'INACTIVE'; lastTradeAt: number | null };
-  'connection.status': { status: 'connected' | 'authenticated' | 'error'; message?: string; serverTime: number };
+  'trader.status': {
+    traderAddress: string;
+    status: WatchStatus | 'INACTIVE';
+    lastTradeAt: number | null;
+  };
+  'connection.status': {
+    status: 'connected' | 'authenticated' | 'error';
+    message?: string;
+    serverTime: number;
+  };
   notification: NotificationItem;
 }
 
@@ -33,6 +41,4 @@ export interface WsServerMessage<E extends WsEventName = WsEventName> {
 }
 
 export type WsClientMessage =
-  | { type: 'auth'; token: string }
-  | { type: 'ping'; ts: number }
-  | { type: 'resync' };
+  { type: 'auth'; token: string } | { type: 'ping'; ts: number } | { type: 'resync' };

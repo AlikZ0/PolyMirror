@@ -43,9 +43,19 @@ export class TraderDataLoader {
       ]);
       const notes: string[] = [];
       if (fills.length >= MAX_FILLS_PER_TRADER) {
-        notes.push(`Activity metrics use the ${MAX_FILLS_PER_TRADER.toLocaleString('en-US')} most recent fills.`);
+        notes.push(
+          `Activity metrics use the ${MAX_FILLS_PER_TRADER.toLocaleString('en-US')} most recent fills.`,
+        );
       }
-      const data: TraderData = { address: a, fills, positions, stats, profile, notes, loadedAt: Date.now() };
+      const data: TraderData = {
+        address: a,
+        fills,
+        positions,
+        stats,
+        profile,
+        notes,
+        loadedAt: Date.now(),
+      };
       void this.persistPositions(data).catch(() => undefined);
       return data;
     });
@@ -56,7 +66,11 @@ export class TraderDataLoader {
     if (data.positions.length === 0) return;
     const trader = await this.db.trader.upsert({
       where: { address: data.address },
-      create: { address: data.address, userName: data.profile?.userName ?? null, profileImage: data.profile?.profileImage ?? null },
+      create: {
+        address: data.address,
+        userName: data.profile?.userName ?? null,
+        profileImage: data.profile?.profileImage ?? null,
+      },
       update: {
         lastTradeAt: data.fills[0] ? new Date(data.fills[0].timestamp) : undefined,
         ...(data.profile?.userName ? { userName: data.profile.userName } : {}),
@@ -92,7 +106,10 @@ export class TraderDataLoader {
   }
 
   async saveAnalyticsSnapshot(address: string, period: string, payload: unknown) {
-    const trader = await this.db.trader.findUnique({ where: { address: address.toLowerCase() }, select: { id: true } });
+    const trader = await this.db.trader.findUnique({
+      where: { address: address.toLowerCase() },
+      select: { id: true },
+    });
     if (!trader) return;
     const json = JSON.parse(JSON.stringify(payload)) as Prisma.InputJsonValue;
     await this.db.analyticsSnapshot.upsert({

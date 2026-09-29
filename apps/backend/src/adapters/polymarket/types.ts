@@ -51,7 +51,9 @@ export interface PolymarketAdapter {
 
   getTraderStats(address: string): Promise<TraderStats | null>;
 
-  getTraderProfile(address: string): Promise<{ userName: string | null; profileImage: string | null } | null>;
+  getTraderProfile(
+    address: string,
+  ): Promise<{ userName: string | null; profileImage: string | null } | null>;
 
   getMarkets(conditionIds: readonly string[]): Promise<MarketInfo[]>;
 

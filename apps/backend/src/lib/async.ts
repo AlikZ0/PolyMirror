@@ -8,12 +8,15 @@ export async function mapLimit<T, R>(
 ): Promise<R[]> {
   const results = new Array<R>(items.length);
   let next = 0;
-  const workers = Array.from({ length: Math.max(1, Math.min(concurrency, items.length)) }, async () => {
-    while (next < items.length) {
-      const i = next++;
-      results[i] = await fn(items[i]!, i);
-    }
-  });
+  const workers = Array.from(
+    { length: Math.max(1, Math.min(concurrency, items.length)) },
+    async () => {
+      while (next < items.length) {
+        const i = next++;
+        results[i] = await fn(items[i]!, i);
+      }
+    },
+  );
   await Promise.all(workers);
   return results;
 }
@@ -37,7 +40,10 @@ export class RateLimiter {
     const run = async () => {
       for (;;) {
         const t = this.now();
-        this.tokens = Math.min(this.burst, this.tokens + ((t - this.last) / 1000) * this.ratePerSecond);
+        this.tokens = Math.min(
+          this.burst,
+          this.tokens + ((t - this.last) / 1000) * this.ratePerSecond,
+        );
         this.last = t;
         if (this.tokens >= 1) {
           this.tokens -= 1;

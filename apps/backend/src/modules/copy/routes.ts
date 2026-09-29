@@ -19,7 +19,10 @@ export async function copyRoutes(app: FastifyInstance, ctx: AppContext) {
     const pending = await ctx.copyStore.listPending(req.userId);
     const items = [];
     for (const order of pending) {
-      items.push({ order: publicOrder(order), preview: await ctx.copyEngine.preview(req.userId, { copyOrderId: order.id }) });
+      items.push({
+        order: publicOrder(order),
+        preview: await ctx.copyEngine.preview(req.userId, { copyOrderId: order.id }),
+      });
     }
     return { items };
   });
@@ -30,23 +33,36 @@ export async function copyRoutes(app: FastifyInstance, ctx: AppContext) {
       where: { userId_sourceTradeId: { userId: req.userId, sourceTradeId: body.sourceTradeId } },
       select: { id: true },
     });
-    return ctx.copyEngine.preview(req.userId, existing ? { copyOrderId: existing.id } : { sourceTradeId: body.sourceTradeId });
+    return ctx.copyEngine.preview(
+      req.userId,
+      existing ? { copyOrderId: existing.id } : { sourceTradeId: body.sourceTradeId },
+    );
   });
 
-  app.post('/api/copy/confirm', { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } }, async (req) => {
-    const body = copyConfirmSchema.parse(req.body);
-    return { order: publicOrder(await ctx.copyEngine.confirm(req.userId, body)) };
-  });
+  app.post(
+    '/api/copy/confirm',
+    { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } },
+    async (req) => {
+      const body = copyConfirmSchema.parse(req.body);
+      return { order: publicOrder(await ctx.copyEngine.confirm(req.userId, body)) };
+    },
+  );
 
   app.post('/api/copy/skip', async (req) => {
     const body = copySkipSchema.parse(req.body);
-    return { order: publicOrder(await ctx.copyEngine.skip(req.userId, body.copyOrderId, body.reason)) };
+    return {
+      order: publicOrder(await ctx.copyEngine.skip(req.userId, body.copyOrderId, body.reason)),
+    };
   });
 
-  app.post('/api/copy/verify', { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } }, async (req) => {
-    const body = assistedFillReportSchema.parse(req.body);
-    return { order: publicOrder(await ctx.copyEngine.verify(req.userId, body.copyOrderId)) };
-  });
+  app.post(
+    '/api/copy/verify',
+    { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } },
+    async (req) => {
+      const body = assistedFillReportSchema.parse(req.body);
+      return { order: publicOrder(await ctx.copyEngine.verify(req.userId, body.copyOrderId)) };
+    },
+  );
 
   app.get('/api/copy/history', async (req) => {
     const q = copyHistoryQuerySchema.parse(req.query);

@@ -50,25 +50,42 @@ export class WatchlistService {
       create: { userId, traderId: trader.id },
       update: { status: 'ACTIVE', enabled: true },
     });
-    await this.db.auditLog.create({ data: { userId, action: 'watchlist.add', entityType: 'Trader', entityId: trader.id } });
+    await this.db.auditLog.create({
+      data: { userId, action: 'watchlist.add', entityType: 'Trader', entityId: trader.id },
+    });
     const items = await this.list(userId);
     return items.find((i) => i.traderAddress === trader.address)!;
   }
 
   async setStatus(userId: string, id: string, status: 'ACTIVE' | 'PAUSED'): Promise<WatchlistItem> {
-    const res = await this.db.watchlist.updateMany({ where: { id, userId }, data: { status, enabled: status === 'ACTIVE' } });
+    const res = await this.db.watchlist.updateMany({
+      where: { id, userId },
+      data: { status, enabled: status === 'ACTIVE' },
+    });
     if (res.count === 0) throw notFound('Watchlist entry not found');
-    await this.db.auditLog.create({ data: { userId, action: `watchlist.${status.toLowerCase()}`, entityType: 'Watchlist', entityId: id } });
+    await this.db.auditLog.create({
+      data: {
+        userId,
+        action: `watchlist.${status.toLowerCase()}`,
+        entityType: 'Watchlist',
+        entityId: id,
+      },
+    });
     return (await this.list(userId)).find((i) => i.id === id)!;
   }
 
   async remove(userId: string, id: string): Promise<void> {
     const res = await this.db.watchlist.deleteMany({ where: { id, userId } });
     if (res.count === 0) throw notFound('Watchlist entry not found');
-    await this.db.auditLog.create({ data: { userId, action: 'watchlist.remove', entityType: 'Watchlist', entityId: id } });
+    await this.db.auditLog.create({
+      data: { userId, action: 'watchlist.remove', entityType: 'Watchlist', entityId: id },
+    });
   }
 
   async markSeen(userId: string, address: string): Promise<void> {
-    await this.db.watchlist.updateMany({ where: { userId, trader: { address: address.toLowerCase() } }, data: { newTrades: 0 } });
+    await this.db.watchlist.updateMany({
+      where: { userId, trader: { address: address.toLowerCase() } },
+      data: { newTrades: 0 },
+    });
   }
 }

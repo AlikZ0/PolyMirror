@@ -13,9 +13,19 @@ export class CopySettingsService {
   async update(userId: string, input: unknown): Promise<CopySettings> {
     const parsed = enforceSafetyCeilings(copySettingsInputSchema.parse(input));
     const data = { ...parsed, walletAddress: parsed.walletAddress };
-    const row = await this.db.copySettings.upsert({ where: { userId }, create: { userId, ...data }, update: data });
+    const row = await this.db.copySettings.upsert({
+      where: { userId },
+      create: { userId, ...data },
+      update: data,
+    });
     await this.db.auditLog.create({
-      data: { userId, action: 'copy.settings.update', entityType: 'CopySettings', entityId: row.id, payload: JSON.parse(JSON.stringify(parsed)) },
+      data: {
+        userId,
+        action: 'copy.settings.update',
+        entityType: 'CopySettings',
+        entityId: row.id,
+        payload: JSON.parse(JSON.stringify(parsed)),
+      },
     });
     return toCopySettings(row);
   }

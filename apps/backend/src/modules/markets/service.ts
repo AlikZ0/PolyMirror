@@ -74,6 +74,10 @@ export class MarketService implements MarketPort {
       tokenIds: m.tokenIds,
       outcomePrices: m.outcomePrices.filter((p) => Number.isFinite(p)),
     };
-    await this.db.market.upsert({ where: { conditionId: m.conditionId }, create: { conditionId: m.conditionId, ...data }, update: data });
+    await this.db.market.upsert({
+      where: { conditionId: m.conditionId },
+      create: { conditionId: m.conditionId, ...data },
+      update: data,
+    });
   }
 }

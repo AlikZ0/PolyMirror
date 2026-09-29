@@ -34,7 +34,10 @@ export class TraderService {
   ) {}
 
   private async watchedMap(userId: string): Promise<Map<string, string>> {
-    const rows = await this.db.watchlist.findMany({ where: { userId }, include: { trader: { select: { address: true } } } });
+    const rows = await this.db.watchlist.findMany({
+      where: { userId },
+      include: { trader: { select: { address: true } } },
+    });
     return new Map(rows.map((r) => [r.trader.address, r.id]));
   }
 
@@ -73,15 +76,25 @@ export class TraderService {
       averageHoldingTimeMs: analytics.activity.averageHoldingTimeMs,
       maxDrawdown: analytics.risk.maxDrawdown,
       lastActive: analytics.activity.lastTradeAt,
-      categories: analytics.charts.categories.map((c) => c.label).filter((l) => l !== 'Uncategorized'),
-      marketsTraded: data.stats?.marketsTraded ?? (empty ? null : new Set(data.fills.map((f) => f.conditionId)).size),
+      categories: analytics.charts.categories
+        .map((c) => c.label)
+        .filter((l) => l !== 'Uncategorized'),
+      marketsTraded:
+        data.stats?.marketsTraded ??
+        (empty ? null : new Set(data.fills.map((f) => f.conditionId)).size),
       joinDate: data.stats?.joinDate ?? null,
       isWatched: watched.has(a),
       watchlistId: watched.get(a) ?? null,
     };
   }
 
-  async trades(address: string, q: Required<Pick<HistoricalTradesQuery, 'page' | 'pageSize' | 'sortBy' | 'sortDirection' | 'status'>> & HistoricalTradesQuery): Promise<Paginated<HistoricalTradeRow>> {
+  async trades(
+    address: string,
+    q: Required<
+      Pick<HistoricalTradesQuery, 'page' | 'pageSize' | 'sortBy' | 'sortDirection' | 'status'>
+    > &
+      HistoricalTradesQuery,
+  ): Promise<Paginated<HistoricalTradeRow>> {
     const data = await this.loader.load(address);
     let rows: HistoricalTradeRow[] = data.positions.map((p) => ({
       id: p.id,
@@ -101,7 +114,10 @@ export class TraderService {
     if (q.status !== 'ALL') rows = rows.filter((r) => r.status === q.status);
     if (q.search) {
       const s = q.search.toLowerCase();
-      rows = rows.filter((r) => (r.market ?? '').toLowerCase().includes(s) || (r.outcome ?? '').toLowerCase().includes(s));
+      rows = rows.filter(
+        (r) =>
+          (r.market ?? '').toLowerCase().includes(s) || (r.outcome ?? '').toLowerCase().includes(s),
+      );
     }
     if (q.from !== undefined) rows = rows.filter((r) => r.date !== null && r.date >= q.from!);
     if (q.to !== undefined) rows = rows.filter((r) => r.date !== null && r.date <= q.to!);
@@ -126,7 +142,12 @@ export class TraderService {
       return (ka < kb ? -1 : ka > kb ? 1 : 0) * dir;
     });
     const start = (q.page - 1) * q.pageSize;
-    return { items: rows.slice(start, start + q.pageSize), total: rows.length, page: q.page, pageSize: q.pageSize };
+    return {
+      items: rows.slice(start, start + q.pageSize),
+      total: rows.length,
+      page: q.page,
+      pageSize: q.pageSize,
+    };
   }
 
   /**
@@ -142,7 +163,10 @@ export class TraderService {
       limit: Math.min(200, Math.max(f.limit * 2, 50)),
     });
     const watched = await this.watchedMap(userId);
-    const enrichCount = this.adapter.mode === 'demo' ? candidates.length : Math.min(this.options.enrichLimit, candidates.length);
+    const enrichCount =
+      this.adapter.mode === 'demo'
+        ? candidates.length
+        : Math.min(this.options.enrichLimit, candidates.length);
 
     const rows = await mapLimit(candidates, 3, async (c, i): Promise<TraderSummary> => {
       const base: TraderSummary = {
@@ -168,7 +192,12 @@ export class TraderService {
         const key = `${c.address}|${f.period}`;
         const summary = await this.summaryCache.getOrLoad(key, async () => {
           const analytics = await this.analytics(c.address, f.period);
-          return summarizeTrader({ address: c.address, userName: c.userName, profileImage: c.profileImage }, analytics, now, false);
+          return summarizeTrader(
+            { address: c.address, userName: c.userName, profileImage: c.profileImage },
+            analytics,
+            now,
+            false,
+          );
         });
         return { ...summary, isWatched: watched.has(c.address) };
       } catch {
@@ -176,17 +205,21 @@ export class TraderService {
       }
     });
 
-    const pass = (v: number | null, min: number | undefined) => min === undefined || (v !== null && v >= min);
+    const pass = (v: number | null, min: number | undefined) =>
+      min === undefined || (v !== null && v >= min);
     const filtered = rows.filter((r) => {
       if (!pass(r.totalVolume, f.minTotalVolume)) return false;
       if (!pass(r.tradeCount, f.minTrades)) return false;
       if (!pass(r.largestTrade, f.minTradeSize)) return false;
       if (!pass(r.pnl, f.minPnl)) return false;
       if (!pass(r.roi, f.minRoi === undefined ? undefined : f.minRoi / 100)) return false;
-      if (!pass(r.winRate, f.minWinRate === undefined ? undefined : f.minWinRate / 100)) return false;
+      if (!pass(r.winRate, f.minWinRate === undefined ? undefined : f.minWinRate / 100))
+        return false;
       if (!pass(r.averagePosition, f.minAveragePosition)) return false;
-      if (f.maxDrawdown !== undefined && (r.maxDrawdown === null || r.maxDrawdown > f.maxDrawdown)) return false;
-      if (f.category && !r.categories.some((c) => c.toLowerCase() === f.category!.toLowerCase())) return false;
+      if (f.maxDrawdown !== undefined && (r.maxDrawdown === null || r.maxDrawdown > f.maxDrawdown))
+        return false;
+      if (f.category && !r.categories.some((c) => c.toLowerCase() === f.category!.toLowerCase()))
+        return false;
       if (f.activity === 'active' && r.active !== true) return false;
       if (f.activity === 'inactive' && r.active !== false) return false;
       return true;
@@ -203,7 +236,10 @@ export class TraderService {
       return ((va as number) - (vb as number)) * dir;
     });
 
-    void this.persistSnapshots(filtered.filter((r) => r.enriched), f.period).catch(() => undefined);
+    void this.persistSnapshots(
+      filtered.filter((r) => r.enriched),
+      f.period,
+    ).catch(() => undefined);
     return { items: filtered.slice(0, f.limit), generatedAt: now, source: this.adapter.sourceName };
   }
 
@@ -235,7 +271,10 @@ export class TraderService {
   }
 
   async performance(userId: string, address: string): Promise<PerformanceComparison> {
-    const [analytics, user] = await Promise.all([this.analytics(address, 'all'), this.stats.forUser(userId, address)]);
+    const [analytics, user] = await Promise.all([
+      this.analytics(address, 'all'),
+      this.stats.forUser(userId, address),
+    ]);
     return {
       traderAddress: address.toLowerCase(),
       trader: {
@@ -244,7 +283,12 @@ export class TraderService {
         winRate: analytics.performance.winRate,
         maxDrawdown: analytics.risk.maxDrawdown,
       },
-      user: { roi: user.roi, pnl: user.totalPnl, winRate: user.winRate, maxDrawdown: user.maxDrawdown },
+      user: {
+        roi: user.roi,
+        pnl: user.totalPnl,
+        winRate: user.winRate,
+        maxDrawdown: user.maxDrawdown,
+      },
       copiedTrades: user.totalCopied,
       disclaimer: COMPARISON_DISCLAIMER,
     };

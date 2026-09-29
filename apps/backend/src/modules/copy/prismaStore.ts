@@ -2,8 +2,19 @@ import type { CopyOrderStatus } from '@polymirror/shared';
 import { Prisma } from '@prisma/client';
 import type { Db } from '../../database/prisma';
 import { isUniqueViolation } from '../../database/prisma';
-import { toCopyOrder, toCopyOrderUpdate, toCopySettings, toStoredTrade } from '../../database/mappers';
-import type { CopyOrderRecord, CopyStore, ExposureSnapshot, NewCopyOrder, StoredTrade } from './types';
+import {
+  toCopyOrder,
+  toCopyOrderUpdate,
+  toCopySettings,
+  toStoredTrade,
+} from '../../database/mappers';
+import type {
+  CopyOrderRecord,
+  CopyStore,
+  ExposureSnapshot,
+  NewCopyOrder,
+  StoredTrade,
+} from './types';
 
 const withTrader = { trader: { select: { address: true } } } as const;
 const COMMITTED: CopyOrderStatus[] = ['EXECUTING', 'SUBMITTED', 'CONFIRMED'];
@@ -28,11 +39,16 @@ export class PrismaCopyStore implements CopyStore {
   }
 
   async getOrderByConfirmKey(key: string): Promise<CopyOrderRecord | null> {
-    const row = await this.db.copyOrder.findUnique({ where: { confirmIdempotencyKey: key }, include: withTrader });
+    const row = await this.db.copyOrder.findUnique({
+      where: { confirmIdempotencyKey: key },
+      include: withTrader,
+    });
     return row ? toCopyOrder(row) : null;
   }
 
-  async insertOrderIfAbsent(order: NewCopyOrder): Promise<{ order: CopyOrderRecord; created: boolean }> {
+  async insertOrderIfAbsent(
+    order: NewCopyOrder,
+  ): Promise<{ order: CopyOrderRecord; created: boolean }> {
     try {
       const row = await this.db.copyOrder.create({
         data: {
@@ -61,7 +77,10 @@ export class PrismaCopyStore implements CopyStore {
       return { order: toCopyOrder(row), created: true };
     } catch (err) {
       if (!isUniqueViolation(err)) throw err;
-      const existing = await this.db.copyOrder.findUnique({ where: { idempotencyKey: order.idempotencyKey }, include: withTrader });
+      const existing = await this.db.copyOrder.findUnique({
+        where: { idempotencyKey: order.idempotencyKey },
+        include: withTrader,
+      });
       if (!existing) throw err;
       return { order: toCopyOrder(existing), created: false };
     }
@@ -82,16 +101,29 @@ export class PrismaCopyStore implements CopyStore {
   }
 
   async update(id: string, patch: Partial<CopyOrderRecord>) {
-    const row = await this.db.copyOrder.update({ where: { id }, data: toCopyOrderUpdate(patch), include: withTrader });
+    const row = await this.db.copyOrder.update({
+      where: { id },
+      data: toCopyOrderUpdate(patch),
+      include: withTrader,
+    });
     return toCopyOrder(row);
   }
 
-  async exposure(userId: string, dayStart: number, excludeOrderId?: string): Promise<ExposureSnapshot> {
+  async exposure(
+    userId: string,
+    dayStart: number,
+    excludeOrderId?: string,
+  ): Promise<ExposureSnapshot> {
     const exclude = excludeOrderId ? { id: { not: excludeOrderId } } : {};
     const [daily, open, realized] = await Promise.all([
       this.db.copyOrder.aggregate({
         _sum: { amount: true },
-        where: { userId, status: { in: COMMITTED }, executedAt: { gte: new Date(dayStart) }, ...exclude },
+        where: {
+          userId,
+          status: { in: COMMITTED },
+          executedAt: { gte: new Date(dayStart) },
+          ...exclude,
+        },
       }),
       this.db.copyOrder.aggregate({
         _sum: { amount: true },
@@ -173,7 +205,10 @@ export class PrismaCopyStore implements CopyStore {
         action,
         entityType: 'CopyOrder',
         entityId,
-        payload: payload === undefined ? Prisma.JsonNull : (JSON.parse(JSON.stringify(payload)) as Prisma.InputJsonValue),
+        payload:
+          payload === undefined
+            ? Prisma.JsonNull
+            : (JSON.parse(JSON.stringify(payload)) as Prisma.InputJsonValue),
       },
     });
   }

@@ -3,7 +3,9 @@ import type { TradeFill, TraderPosition } from '../types';
 import type { LimitContext } from '../utils/limits';
 
 let n = 0;
-export function fill(p: Partial<TradeFill> & Pick<TradeFill, 'side' | 'size' | 'price' | 'timestamp'>): TradeFill {
+export function fill(
+  p: Partial<TradeFill> & Pick<TradeFill, 'side' | 'size' | 'price' | 'timestamp'>,
+): TradeFill {
   n += 1;
   return {
     id: `f${n}`,

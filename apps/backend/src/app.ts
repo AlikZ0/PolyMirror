@@ -19,7 +19,9 @@ export function createServer(config: AppConfig) {
     logger: {
       level: config.logLevel,
       redact: { paths: ['req.headers.authorization', 'req.headers.cookie'], censor: '[redacted]' },
-      ...(config.env === 'development' ? { transport: { target: 'pino-pretty', options: { singleLine: true } } } : {}),
+      ...(config.env === 'development'
+        ? { transport: { target: 'pino-pretty', options: { singleLine: true } } }
+        : {}),
     },
     trustProxy: config.trustProxy,
     bodyLimit: 64 * 1024,
@@ -32,7 +34,12 @@ export function originAllowed(origin: string, patterns: readonly string[]): bool
   return patterns.some((p) => {
     if (p === origin) return true;
     if (!p.includes('*')) return false;
-    const re = new RegExp(`^${p.split('*').map((s) => s.replace(/[.+?^${}()|[\]\\/]/g, '\\$&')).join('[^/]+')}$`);
+    const re = new RegExp(
+      `^${p
+        .split('*')
+        .map((s) => s.replace(/[.+?^${}()|[\]\\/]/g, '\\$&'))
+        .join('[^/]+')}$`,
+    );
     return re.test(origin);
   });
 }
@@ -56,13 +63,20 @@ export async function registerApp(app: ReturnType<typeof createServer>, ctx: App
     keyGenerator: (req) => bearerToken(req) ?? req.ip,
     errorResponseBuilder: (_req, context) => ({
       statusCode: 429,
-      error: { code: 'RATE_LIMITED', message: `Too many requests — retry in ${Math.ceil(context.ttl / 1000)}s` },
+      error: {
+        code: 'RATE_LIMITED',
+        message: `Too many requests — retry in ${Math.ceil(context.ttl / 1000)}s`,
+      },
     }),
   });
 
   await app.register(websocket, { options: { maxPayload: 4_096 } });
 
-  app.get('/health', async () => ({ status: 'ok', mode: ctx.adapter.mode, connections: ctx.hub.connectedUsers() }));
+  app.get('/health', async () => ({
+    status: 'ok',
+    mode: ctx.adapter.mode,
+    connections: ctx.hub.connectedUsers(),
+  }));
 
   // Public routes
   await app.register(async (scope) => userRoutes(scope, ctx));

@@ -41,7 +41,8 @@ describe('demo data source', () => {
     const d = new DemoPolymarketAdapter(() => START, START);
     const rows = await d.listLeaderboard({ window: 'month', sortBy: 'VOLUME', limit: 10 });
     expect(rows).toHaveLength(10);
-    for (let i = 1; i < rows.length; i++) expect(rows[i - 1]!.volume!).toBeGreaterThanOrEqual(rows[i]!.volume!);
+    for (let i = 1; i < rows.length; i++)
+      expect(rows[i - 1]!.volume!).toBeGreaterThanOrEqual(rows[i]!.volume!);
   });
 });
 
@@ -55,7 +56,11 @@ describe('infrastructure', () => {
   it('ws hub sends only to the target user with increasing seq', () => {
     const hub = new WsHub();
     const sent: Record<string, string[]> = { a: [], b: [] };
-    const sock = (k: 'a' | 'b') => ({ readyState: 1, send: (d: string) => sent[k]!.push(d), close: () => undefined });
+    const sock = (k: 'a' | 'b') => ({
+      readyState: 1,
+      send: (d: string) => sent[k]!.push(d),
+      close: () => undefined,
+    });
     const a = sock('a');
     hub.add('u1', a);
     hub.add('u2', sock('b'));

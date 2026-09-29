@@ -41,5 +41,8 @@ export interface ExecutionAdapter {
   /** Available balance (USDC) or null when it cannot be read. */
   getBalance(ctx: BalanceContext): Promise<number | null>;
   submit(order: CopyOrder, ctx: { walletAddress: string | null }): Promise<SubmitResult>;
-  verify(order: CopyOrder, ctx: { walletAddress: string | null; now: number }): Promise<VerifyResult>;
+  verify(
+    order: CopyOrder,
+    ctx: { walletAddress: string | null; now: number },
+  ): Promise<VerifyResult>;
 }
