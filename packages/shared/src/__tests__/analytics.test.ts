@@ -185,3 +185,15 @@ describe('Trader analytics', () => {
     expect(maxSimultaneousPositions([position({ openedAt: null })], 100)).toBeNull();
   });
 });
+
+describe('Malformed input', () => {
+  it('ignores fills with non-positive price or size', () => {
+    const { positions } = reconstructPositions([
+      fill({ side: 'BUY', size: 10, price: 0.5, timestamp: 1 }),
+      fill({ side: 'BUY', size: Number.POSITIVE_INFINITY, price: 0, timestamp: 2 }),
+    ]);
+    expect(positions).toHaveLength(1);
+    expect(Number.isFinite(positions[0]!.pnl)).toBe(true);
+    expect(positions[0]!.cost).toBeCloseTo(5);
+  });
+});

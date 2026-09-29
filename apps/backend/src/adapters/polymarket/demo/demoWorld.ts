@@ -339,12 +339,16 @@ export class DemoWorld {
         let t = openAt;
         let shares = 0;
         for (let l = 0; l < legs; l++) {
+          // No entries into a resolved (or effectively decided) market.
+          if (market.resolvesAt !== null && t >= market.resolvesAt) break;
           const price = this.priceAt(market, index, t);
+          if (price <= 0.01 || price >= 0.99) break;
           const size = total / legs / price;
           fills.push(this.makeFill(trader, market, index, 'BUY', size, price, Math.floor(t)));
           shares += Math.round(size * 100) / 100;
           t += rng.range(0.05, 1.5) * DAY_MS;
         }
+        if (shares === 0) continue;
         // Exit before resolution in ~60% of cases.
         if (rng.chance(0.6)) {
           const exitAt = t + rng.range(0.2, 12) * DAY_MS;

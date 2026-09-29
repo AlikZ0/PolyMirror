@@ -30,6 +30,9 @@ export function reconstructPositions(
 ): ReconstructResult {
   const byToken = new Map<string, TradeFill[]>();
   for (const f of fills) {
+    // Malformed fills (non-positive price or size) carry no usable cost basis.
+    if (!(f.price > 0) || !(f.size > 0) || !Number.isFinite(f.price) || !Number.isFinite(f.size))
+      continue;
     const key = `${f.traderAddress.toLowerCase()}|${f.tokenId}`;
     const list = byToken.get(key);
     if (list) list.push(f);

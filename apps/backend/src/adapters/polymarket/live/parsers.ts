@@ -96,6 +96,7 @@ export function parseTrades(rows: readonly unknown[]): {
     const r = rawTrade.safeParse(row);
     if (!r.success) continue;
     const t = r.data;
+    if (!(t.price > 0) || !(t.size > 0)) continue;
     const trader = t.proxy_wallet.toLowerCase();
     profiles.set(trader, { userName: t.name ?? t.pseudonym, profileImage: t.profile_image });
     fills.push({

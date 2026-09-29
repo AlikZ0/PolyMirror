@@ -31,8 +31,8 @@ jobs:
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm test
       - run: pnpm db:deploy
+      - run: pnpm test
       - run: pnpm build
       - name: E2E (extension)
         run: |

@@ -92,9 +92,7 @@ export interface CopyEventsPort {
 
 export interface MarketPort {
   getCurrentPrice(tokenId: string): Promise<number | null>;
-  getMarketState(
-    conditionId: string,
-  ): Promise<{
+  getMarketState(conditionId: string): Promise<{
     active: boolean | null;
     resolvedPrice?: (tokenId: string) => number | null;
     url: string | null;
